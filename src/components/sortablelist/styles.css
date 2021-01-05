@@ -1,0 +1,32 @@
+body,
+html,
+#root,
+.wrapper-sortablelist {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+.wrapper-sortablelist {
+  display: flex;
+  flex-direction: column;
+}
+
+.bar-wrapper-sortablelist {
+  margin-top: 5px;
+  margin-left: 5px;
+}
+
+.tree-wrapper-sortablelist {
+  height: calc(100% - 25px);
+}
+
+.previous-sortablelist {
+  margin-left: 10px;
+}
+
+.next-sortablelist,
+.collapse-sortablelist {
+  margin-right: 10px;
+  margin-left: 5px;
+}

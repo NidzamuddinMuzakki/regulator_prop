@@ -1,0 +1,7 @@
+{
+    "name": "Kerno",
+    "version": "0.1.0",
+    "private": true,
+    "main": "./SourceData.js"
+}
+  

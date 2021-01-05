@@ -1,0 +1,156 @@
+body.user-select-none {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+body .react-field-mapping-box {
+  display: flex;
+  color: #666;
+  font-size: 12px;
+  justify-content: space-between;
+  position: relative;
+}
+body .react-field-mapping-box * {
+  box-sizing: border-box;
+}
+body .react-field-mapping-box .source-data,
+body .react-field-mapping-box .target-data {
+  min-width: 208px;
+  position: relative;
+  z-index: 3;
+}
+body .react-field-mapping-box .source-data > ul,
+body .react-field-mapping-box .target-data > ul {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+body .react-field-mapping-box .source-data > ul li,
+body .react-field-mapping-box .target-data > ul li {
+  width: 100%;
+  display: flex;
+  padding-right: 8px;
+  list-style: none;
+  height: 36px;
+  line-height: 36px;
+  background-color: #fcfcfc;
+  border-bottom: 1px dashed #dddddd;
+  position: relative;
+}
+body .react-field-mapping-box .source-data > ul li.active,
+body .react-field-mapping-box .target-data > ul li.active {
+  background-color: #eefbff;
+}
+body .react-field-mapping-box .source-data > ul li.sortable-ghost,
+body .react-field-mapping-box .target-data > ul li.sortable-ghost {
+  background-color: rgba(240, 224, 199, 0.3);
+}
+body .react-field-mapping-box .source-data > ul li .column-item,
+body .react-field-mapping-box .target-data > ul li .column-item {
+  padding-left: 20px;
+  width: 100px;
+  height: 100%;
+  float: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body .react-field-mapping-box .source-data > ul li .column-icon,
+body .react-field-mapping-box .target-data > ul li .column-icon {
+  visibility: hidden;
+  position: absolute;
+  top: calc(50% - 7px);
+  width: 14px;
+  height: 14px;
+  border-radius: 14px;
+  background-color: #FFF;
+  padding: 4px;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
+  cursor: crosshair;
+}
+body .react-field-mapping-box .source-data > ul li .column-icon:before,
+body .react-field-mapping-box .target-data > ul li .column-icon:before {
+  content: '';
+  display: inline-block;
+  position: absolute;
+  top: 4px;
+  background-color: #33B5D4;
+  width: 6px;
+  height: 6px;
+  border-radius: 6px;
+  box-shadow: 0px 0.5px 1.5px rgba(0, 0, 0, 0.22) inset;
+}
+body .react-field-mapping-box .source-data > ul.column-title li,
+body .react-field-mapping-box .target-data > ul.column-title li {
+  border-bottom: none;
+  background-color: #f0f0f0;
+}
+body .react-field-mapping-box .source-data .column-content li .column-icon {
+  right: -7px;
+}
+body .react-field-mapping-box .source-data .column-content li.active .column-icon {
+  visibility: inherit!important;
+}
+body .react-field-mapping-box .source-data .column-content li.active .column-icon.sorting {
+  visibility: hidden!important;
+}
+body .react-field-mapping-box .source-data .edit-btn {
+  padding-left: 20px;
+  line-height: 36px;
+  height: 36px;
+  background-color: #fcfcfc;
+  border-bottom: 1px dashed #dddddd;
+}
+body .react-field-mapping-box .source-data .edit-btn a {
+  cursor: pointer;
+  color: #33B5D4;
+}
+body .react-field-mapping-box .target-data .column-icon {
+  left: -7px;
+}
+body .react-field-mapping-box .lines-area {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+body .react-field-mapping-box .lines-area .path,
+body .react-field-mapping-box .lines-area .path-end {
+  fill: #33B5D4;
+}
+body .react-field-mapping-box .lines-area .path .line,
+body .react-field-mapping-box .lines-area .path-end .line {
+  stroke: #33B5D4;
+  fill: none;
+  stroke-width: 2px;
+  background-image: url("https://img.alicdn.com/tfs/TB1ici5ibvpK1RjSZPiXXbmwXXa-461-412.png");
+}
+body .react-field-mapping-box .lines-area .path .arrow,
+body .react-field-mapping-box .lines-area .path-end .arrow {
+  fill: #00A2CA;
+}
+body .react-field-mapping-box .lines-area .path .icon-remove,
+body .react-field-mapping-box .lines-area .path-end .icon-remove {
+  opacity: 0;
+}
+body .react-field-mapping-box .lines-area .path.path-end:hover,
+body .react-field-mapping-box .lines-area .path-end.path-end:hover,
+body .react-field-mapping-box .lines-area .path.path-end.active,
+body .react-field-mapping-box .lines-area .path-end.path-end.active {
+  fill: #00A2CA;
+  cursor: pointer;
+}
+body .react-field-mapping-box .lines-area .path.path-end:hover .line,
+body .react-field-mapping-box .lines-area .path-end.path-end:hover .line,
+body .react-field-mapping-box .lines-area .path.path-end.active .line,
+body .react-field-mapping-box .lines-area .path-end.path-end.active .line {
+  stroke: #00A2CA;
+  stroke-width: 3px;
+}
+body .react-field-mapping-box .lines-area .path.path-end:hover .icon-remove,
+body .react-field-mapping-box .lines-area .path-end.path-end:hover .icon-remove,
+body .react-field-mapping-box .lines-area .path.path-end.active .icon-remove,
+body .react-field-mapping-box .lines-area .path-end.path-end.active .icon-remove {
+  opacity: 1;
+}
