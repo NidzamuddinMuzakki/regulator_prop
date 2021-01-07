@@ -1,4 +1,8 @@
 import React, { Component } from 'react';
+import Table from "./../../../../components/Table";
+import authMethod from './../../../../auth/authMethod';
+import {connect} from 'react-redux';
+import { bindActionCreators } from 'redux'
 import { Button, Row, Col, Modal, ModalBody, ModalFooter, ModalHeader, Form,
   FormGroup,
   FormText, FormFeedback, 
@@ -15,8 +19,44 @@ import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import API from 'api';
 import decode from 'jwt-decode';
+import { cosh } from 'core-js/fn/number';
+import { data } from 'jquery';
+import Dialog from './../../../../components/popup';
+const getUserDept = (name, id,i) => {  //on startup function
+  let token = localStorage.getItem('id_token');
+ 
+  API.post("/credential_service/get_department",{
+    key: token,
+    dept_id: id,
+    info_data:'all'
+  }
+  
+  ).then(data => {
+    let u = data.data.data[0].dept_name;
+    name[i] = u;
+    // this.setState({
+    //   dataSet: data.data.data
+    // });
+  
+  })
+}
+const isOpen1 = (payload) => ({
+  type: "OPEN",
+  payload,
+ 
+})
+const mapDispatchToProps = dispatch =>{
+  return {
+    membuka:()=>dispatch({type:"OPEN", payload:{isOpen:true}})
+  }
+}
+const userSelected1 = state => ({
+  jumlah: state.userSettingSelected
+})
+  
 
 class UserView extends Component {
+  
   constructor(props) {
     super(props);
     this.state = {
@@ -24,20 +64,25 @@ class UserView extends Component {
       btnSave : false,
       btnFilter : false,
       saveClicked : false,
-      
+      dataSet : [],
       modalEdit: false,
       modalAdd: false,
       modalInsert: false,
-
+      Auth:new authMethod(),
       selRow: 0,
       rows: 1,
-
+      actionForm:"",
+      dataSelected :this.props.jumlah,
       modalAction : '',
-
+      dept:[],
       isvalid : true,
       irnumber: 0,
-      editStart: false
+      editStart: false,
+      isOpen:false
+    
+     
     }
+   
     this.cols = [
       {data: 'id', readOnly: true, allowEmpty: false},
       {data: 'ir', readOnly: true, allowEmpty: false},
@@ -192,6 +237,7 @@ class UserView extends Component {
           }
         }
       },
+      
       beforeRemoveRow: (index, amount, physicalRows) => {
         //check and remove from dataChanges
         let tempObject = {Action:"", RowNumber:null, RecordData:{}}
@@ -224,6 +270,7 @@ class UserView extends Component {
       afterRemoveRow: (index, amount, physicalRows) => {
       
       },
+     
       beforeCreateRow: (index, amount, source) => {
         for(let i=0;i<this.dataChanges.length;i++) {
           if(this.dataChanges[i].RowNumber>=index)
@@ -274,42 +321,42 @@ class UserView extends Component {
           //})
         }
       },
-      afterChange: (changes,source) => {
-        // this.setState({
-        //   selRow: 0
-        // }, () => {
-          if (source == 'loadData') {
-            if(this.state.modalAction=='editsave') {
-              this.hotTableComponent.current.hotInstance.validateRows([this.state.selRow-1], (valid) => {
-                if (valid) {
-                  this.setState({
-                    modalEdit: !this.state.modalEdit,
-                    modalAction: '',
-                    selRow: 0
-                  }, () => {
-                    for(let i=0;i<this.cols.length;i++) {
-                      this.cols[i].readOnly = false;
-                    }
-                  })
-                } else {
-                  alert('Invalid!')
-                  //this.hotTableComponent.current.hotInstance.setDataAtRowProp(this.state.selRow-1,0,_tempSelRowData)
+      // afterChange: (changes,source) => {
+      //   // this.setState({
+      //   //   selRow: 0
+      //   // }, () => {
+      //     if (source == 'loadData') {
+      //       if(this.state.modalAction=='editsave') {
+      //         this.hotTableComponent.current.hotInstance.validateRows([this.state.selRow-1], (valid) => {
+      //           if (valid) {
+      //             this.setState({
+      //               modalEdit: !this.state.modalEdit,
+      //               modalAction: '',
+      //               selRow: 0
+      //             }, () => {
+      //               for(let i=0;i<this.cols.length;i++) {
+      //                 this.cols[i].readOnly = false;
+      //               }
+      //             })
+      //           } else {
+      //             alert('Invalid!')
+      //             //this.hotTableComponent.current.hotInstance.setDataAtRowProp(this.state.selRow-1,0,_tempSelRowData)
                   
-                }
-              })
-            } else if(this.state.modalAction=='editcancel') {
-              this.setState({
-                modalEdit: !this.state.modalEdit,
-                modalAction: '',
-                selRow: 0
-              }, () => {
-                for(let i=0;i<this.cols.length;i++) {
-                  this.cols[i].readOnly = false;
-                }
+      //           }
+      //         })
+      //       } else if(this.state.modalAction=='editcancel') {
+      //         this.setState({
+      //           modalEdit: !this.state.modalEdit,
+      //           modalAction: '',
+      //           selRow: 0
+      //         }, () => {
+      //           for(let i=0;i<this.cols.length;i++) {
+      //             this.cols[i].readOnly = false;
+      //           }
                 
-              })
-            } 
-            // else if(this.state.modalAction=='addsave') {
+      //         })
+      //       } 
+      //       // else if(this.state.modalAction=='addsave') {
             //   this.hotTableComponent.current.hotInstance.validateRows([this.state.selRow-1], (valid) => {
             //     if (valid) {
             //       this.setState({
@@ -335,202 +382,204 @@ class UserView extends Component {
               
             //   })
             // }
-          } else if (source !== 'loadData' && source!='IR' && source!='edit') {
-            this.hotTableComponent.current.hotInstance.updateSettings({
-              columns: this.cols,
-            });
-          }
+          // } else if (source !== 'loadData' && source!='IR' && source!='edit') {
+          //   this.hotTableComponent.current.hotInstance.updateSettings({
+          //     columns: this.cols,
+          //   });
+          // }
         // })
-      },
-      afterValidate: (isValid, value, row, prop, source) => {
-        if(isValid==false) {
-          const commentsPlugin = this.hotTableComponent.current.hotInstance.getPlugin('comments');
+      // },
+      // afterValidate: (isValid, value, row, prop, source) => {
+      //   if(isValid==false) {
+      //     const commentsPlugin = this.hotTableComponent.current.hotInstance.getPlugin('comments');
 
-          // Manage comments programmatically:
-          commentsPlugin.setCommentAtCell(row, this.hotTableComponent.current.hotInstance.propToCol(prop), this.selRowValidation[prop]);
+      //     // Manage comments programmatically:
+      //     commentsPlugin.setCommentAtCell(row, this.hotTableComponent.current.hotInstance.propToCol(prop), this.selRowValidation[prop]);
           
-        }
-      }
+      //   }
+      // }
     };
     this.hotTableComponent = React.createRef();
   }
-  basicValidator = (name,value) => {
-    let _ctrExact = 0
-    let response = {}
+  // basicValidator = (name,value) => {
+  //   let _ctrExact = 0
+  //   let response = {}
     
-    if(name=='username') {
-      //console.log(this.state.id+" : "+this.hotTableComponent.current.hotInstance.getDataAtRowProp(this.state.selRow-1,'id'))
+  //   if(name=='username') {
+  //     //console.log(this.state.id+" : "+this.hotTableComponent.current.hotInstance.getDataAtRowProp(this.state.selRow-1,'id'))
       
-      for(let i=0;i<this.hotTableComponent.current.hotInstance.getSourceData().length;i++) {
-        //console.log(this.hotTableComponent.current.hotInstance.getDataAtRowProp(i,'id'))     
+  //     for(let i=0;i<this.hotTableComponent.current.hotInstance.getSourceData().length;i++) {
+  //       //console.log(this.hotTableComponent.current.hotInstance.getDataAtRowProp(i,'id'))     
         
-        //if multiple page, validation use API - connect to Database
-        // console.log("CHECK GET SOURCE DATA")
-        // console.log(this.hotTableComponent.current.hotInstance.getSourceDataAtRow(i))
-        if(this.state.selRow==0) { 
-          //if(this.hotTableComponent.current.hotInstance.getDataAtRowProp(i,'username')==value) {
-          if(this.hotTableComponent.current.hotInstance.getSourceDataAtRow(i)['username']==value) {
-              _ctrExact++
-          }
-        } else {
-          //if(this.hotTableComponent.current.hotInstance.getDataAtRowProp(i,'username')==value&&this.hotTableComponent.current.hotInstance.getDataAtRowProp(i,'id')!=this.state.id) {
-          if(this.hotTableComponent.current.hotInstance.getSourceDataAtRow(i)['username']==value&&this.hotTableComponent.current.hotInstance.getSourceDataAtRow(i)['id']!=this.state.id) {
-              _ctrExact++
-          }
-        }
-      }
-      let _limit = 1
-      if(this.state.selRow==0) { //validation from save button
-        _limit = 2
-      } else { //validation on each record: edit modal
-        _limit = 1
-      }
-      if(value==null||value==undefined) {
-        this.selRowValidation['username'] = "Username must be filled."
-        response.valid = false
-        response.message = 'Username must be filled.'
-      } else if(value=="") {
+  //       //if multiple page, validation use API - connect to Database
+  //       // console.log("CHECK GET SOURCE DATA")
+  //       // console.log(this.hotTableComponent.current.hotInstance.getSourceDataAtRow(i))
+  //       if(this.state.selRow==0) { 
+  //         //if(this.hotTableComponent.current.hotInstance.getDataAtRowProp(i,'username')==value) {
+  //         if(this.hotTableComponent.current.hotInstance.getSourceDataAtRow(i)['username']==value) {
+  //             _ctrExact++
+  //         }
+  //       } else {
+  //         //if(this.hotTableComponent.current.hotInstance.getDataAtRowProp(i,'username')==value&&this.hotTableComponent.current.hotInstance.getDataAtRowProp(i,'id')!=this.state.id) {
+  //         if(this.hotTableComponent.current.hotInstance.getSourceDataAtRow(i)['username']==value&&this.hotTableComponent.current.hotInstance.getSourceDataAtRow(i)['id']!=this.state.id) {
+  //             _ctrExact++
+  //         }
+  //       }
+  //     }
+  //     let _limit = 1
+  //     if(this.state.selRow==0) { //validation from save button
+  //       _limit = 2
+  //     } else { //validation on each record: edit modal
+  //       _limit = 1
+  //     }
+  //     if(value==null||value==undefined) {
+  //       this.selRowValidation['username'] = "Username must be filled."
+  //       response.valid = false
+  //       response.message = 'Username must be filled.'
+  //     } else if(value=="") {
 
-        this.selRowValidation['username'] = "Username must be filled."
-        response.valid = false
-        response.message = 'Username must be filled.'
-      } else if(_ctrExact>=_limit) {
-        this.selRowValidation['username'] = "Duplicated username."
-        response.valid = false
-        response.message = 'Duplicated username.'
-      } else response.valid = true
-    } else if(name=='password') {
-      if(value==null||value==undefined) {
+  //       this.selRowValidation['username'] = "Username must be filled."
+  //       response.valid = false
+  //       response.message = 'Username must be filled.'
+  //     } else if(_ctrExact>=_limit) {
+  //       this.selRowValidation['username'] = "Duplicated username."
+  //       response.valid = false
+  //       response.message = 'Duplicated username.'
+  //     } else response.valid = true
+  //   } else if(name=='password') {
+  //     if(value==null||value==undefined) {
 
-        this.selRowValidation['password'] = "Password must be filled"
-        response.valid = false
-        response.message = 'Password must be filled.'
-      } else if(value=="") {
+  //       this.selRowValidation['password'] = "Password must be filled"
+  //       response.valid = false
+  //       response.message = 'Password must be filled.'
+  //     } else if(value=="") {
 
-        this.selRowValidation['password'] = "Password must be filled"
-        response.valid = false
-        response.message = 'Password must be filled.'
-      } else response.valid = true
-    } else if(name=='roleid') {
-      if(value==null||value==undefined) {
+  //       this.selRowValidation['password'] = "Password must be filled"
+  //       response.valid = false
+  //       response.message = 'Password must be filled.'
+  //     } else response.valid = true
+  //   } else if(name=='roleid') {
+  //     if(value==null||value==undefined) {
 
-        this.selRowValidation['roleid'] = "Role ID must be filled"
-        response.valid = false
-        response.message = 'Role ID must be filled.'
-      } else if(value=="") {
+  //       this.selRowValidation['roleid'] = "Role ID must be filled"
+  //       response.valid = false
+  //       response.message = 'Role ID must be filled.'
+  //     } else if(value=="") {
 
-        this.selRowValidation['roleid'] = "Role ID must be filled"
-        response.valid = false
-        response.message = 'Role ID must be filled.'
-      } else response.valid = true
-    } else {
-      response.valid = true
-    }
-    // console.log(this.selRowValidation[this.hotTableComponent.current.hotInstance.getCellMeta(0,0).prop])
-    return response
-  }
-  usernameValidator = (value, callback) => {
-    // console.log("usernameValidator")
-    callback(this.basicValidator('username',value).valid)
-  }
-  passwordValidator = (value, callback) => {
-    // console.log("passwordValidator")
-    callback(this.basicValidator('password',value).valid)
-  }
-  roleidValidator = (value, callback) => {
-    // console.log("roleidValidator")
-    callback(this.basicValidator('roleid',value).valid)
-  }
-  tableSave = () => { //Save changes
-    console.log(this.state.selRow)
-    this.setState({
-      saveClicked : true
-    },() => {
-      this.hotTableComponent.current.hotInstance.updateSettings({
-        columns: this.cols
-      });
-      this.hotTableComponent.current.hotInstance.getPlugin('filters').clearConditions()
-      this.hotTableComponent.current.hotInstance.getPlugin('filters').disablePlugin()
+  //       this.selRowValidation['roleid'] = "Role ID must be filled"
+  //       response.valid = false
+  //       response.message = 'Role ID must be filled.'
+  //     } else response.valid = true
+  //   } else {
+  //     response.valid = true
+  //   }
+  //   // console.log(this.selRowValidation[this.hotTableComponent.current.hotInstance.getCellMeta(0,0).prop])
+  //   return response
+  // }
+  // usernameValidator = (value, callback) => {
+  //   // console.log("usernameValidator")
+  //   callback(this.basicValidator('username',value).valid)
+  // }
+  
+  // passwordValidator = (value, callback) => {
+  //   // console.log("passwordValidator")
+  //   callback(this.basicValidator('password',value).valid)
+  // }
+  // roleidValidator = (value, callback) => {
+  //   // console.log("roleidValidator")
+  //   callback(this.basicValidator('roleid',value).valid)
+  // }
+  // tableSave = () => { //Save changes
+  //   console.log(this.state.selRow)
+  //   this.setState({
+  //     saveClicked : true
+  //   },() => {
+  //     this.hotTableComponent.current.hotInstance.updateSettings({
+  //       columns: this.cols
+  //     });
+  //     this.hotTableComponent.current.hotInstance.getPlugin('filters').clearConditions()
+  //     this.hotTableComponent.current.hotInstance.getPlugin('filters').disablePlugin()
 
-      this.hotTableComponent.current.hotInstance.validateColumns([0,1,2,3,4],(valid) => {
-        if (valid) {
-          // ... code for validated columns
-          API.post("/api/credential/user/put", null, {
-            params: {
-              data: this.dataChanges,//this.hotTableComponent.current.hotInstance.getSourceData(),
-              len: this.hotTableComponent.current.hotInstance.getSourceData().length
-            }
-          }).then(data => {
-            // console.log(data);
-            this.dataChanges = []
+  //     this.hotTableComponent.current.hotInstance.validateColumns([0,1,2,3,4],(valid) => {
+  //       if (valid) {
+  //         // ... code for validated columns
+  //         API.post("/api/credential/user/put", null, {
+  //           params: {
+  //             data: this.dataChanges,//this.hotTableComponent.current.hotInstance.getSourceData(),
+  //             len: this.hotTableComponent.current.hotInstance.getSourceData().length
+  //           }
+  //         }).then(data => {
+  //           // console.log(data);
+  //           this.dataChanges = []
 
-            this.setState({
-              btnEdit: true,
-              btnSave: false,
-              saveClicked: false
-            }, () => {
+  //           this.setState({
+  //             btnEdit: true,
+  //             btnSave: false,
+  //             saveClicked: false
+  //           }, () => {
               
               
-            })
-          });
-          for(let i=0;i<this.cols.length;i++) {
-            this.cols[i].readOnly = true;
-          }
-        } else {
-          alert("Invalid!");
-        }
-      })
-    })
-  }
-  tableFilter = () => { //Turn on/off filter
-    this.setState({
-      btnFilter: !this.state.btnFilter
-    }, () => {
+  //           })
+  //         });
+  //         for(let i=0;i<this.cols.length;i++) {
+  //           this.cols[i].readOnly = true;
+  //         }
+  //       } else {
+  //         alert("Invalid!");
+  //       }
+  //     })
+  //   })
+  // }
+  // tableFilter = () => { //Turn on/off filter
+  //   this.setState({
+  //     btnFilter: !this.state.btnFilter
+  //   }, () => {
       
-      if(this.state.btnFilter) {
-        this.hotSettings.afterGetColHeader = this.addInput;
-        this.hotSettings.beforeOnCellMouseDown = this.doNotSelectColumn;
-        this.hotSettings.columnHeaderHeight = 52
-        this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)  
-      } else {
-        this.removeInput()
-        this.hotSettings.colHeaders = this.colsHeader
-        delete this.hotSettings.afterGetColHeader;
-        delete this.hotSettings.beforeOnCellMouseDown
-        this.hotSettings.columnHeaderHeight = 25
-        this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)
+  //     if(this.state.btnFilter) {
+  //       this.hotSettings.afterGetColHeader = this.addInput;
+  //       this.hotSettings.beforeOnCellMouseDown = this.doNotSelectColumn;
+  //       this.hotSettings.columnHeaderHeight = 52
+  //       this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)  
+  //     } else {
+  //       this.removeInput()
+  //       this.hotSettings.colHeaders = this.colsHeader
+  //       delete this.hotSettings.afterGetColHeader;
+  //       delete this.hotSettings.beforeOnCellMouseDown
+  //       this.hotSettings.columnHeaderHeight = 25
+  //       this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)
         
-      }
-    })
-  }
-  tableReset = () => { //Rollback changes
-    this.getUserData();
-    this.dataChanges = []
-    this.setState({
-      btnEdit: true,
-      btnSave: false,
-      saveClicked: false
-    }, () => {
-      for(let i=0;i<this.cols.length;i++) {
-        this.cols[i].readOnly = true;
-      }
-      this.hotSettings.columns = this.cols;
-      this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)
-    })
-  }
-  tableEdit = () => { //Turn edit mode on
-    this.setState({
-      btnEdit: false,
-      btnSave: true
-    }, () => {
-      for(let i=0;i<this.cols.length;i++) {
-        this.cols[i].readOnly = false;
-      }
-      this.hotSettings.columns = this.cols;
-      this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)
+  //     }
+  //   })
+  // }
+  // tableReset = () => { //Rollback changes
+    
+  //   this.getUserData();
+  //   this.dataChanges = []
+  //   this.setState({
+  //     btnEdit: true,
+  //     btnSave: false,
+  //     saveClicked: false
+  //   }, () => {
+  //     for(let i=0;i<this.cols.length;i++) {
+  //       this.cols[i].readOnly = true;
+  //     }
+  //     this.hotSettings.columns = this.cols;
+  //     this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)
+  //   })
+  // }
+  // tableEdit = () => { //Turn edit mode on
+  //   this.setState({
+  //     btnEdit: false,
+  //     btnSave: true
+  //   }, () => {
+  //     for(let i=0;i<this.cols.length;i++) {
+  //       this.cols[i].readOnly = false;
+  //     }
+  //     this.hotSettings.columns = this.cols;
+  //     this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)
       
-    })
-  }
+  //   })
+  // }
   tableDownload = () => { //download
     //window.open('http://localhost:3001/api/credential/user/download/excel', "_blank")
     fetch('http://localhost:3001/api/credential/user/download/excel')
@@ -544,295 +593,276 @@ class UserView extends Component {
 				});
 		});
   }
-  handleChange = (e) => {
-    let _valid = e.target.name+'valid'
-    let _invalid = e.target.name+'invalid'
-    let _invalidmsg = e.target.name+'invalidmsg'
+  // handleChange = (e) => {
+  //   let _valid = e.target.name+'valid'
+  //   let _invalid = e.target.name+'invalid'
+  //   let _invalidmsg = e.target.name+'invalidmsg'
 
-    //basicValidator(e.target.value)
-    let validation = this.basicValidator(e.target.name,e.target.value)
-    this.setState(
-        {
-          [e.target.name]: e.target.value,
-          [_valid]: validation.valid,
-          [_invalid]: !validation.valid,
-          [_invalidmsg]: validation.message
-        }, () => { 
+  //   //basicValidator(e.target.value)
+  //   let validation = this.basicValidator(e.target.name,e.target.value)
+  //   this.setState(
+  //       {
+  //         [e.target.name]: e.target.value,
+  //         [_valid]: validation.valid,
+  //         [_invalid]: !validation.valid,
+  //         [_invalidmsg]: validation.message
+  //       }, () => { 
           
-        }
-    )
-  }
+  //       }
+  //   )
+  // }
   
   getUserData = () => {  //on startup function
-    API.get("/api/credential/user/get").then(data => {
-      this.hotTableComponent.current.hotInstance.loadData(data.data);
-    })
-  }
-  getOptionData = () => {  //on startup function
-    API.get("/api/credential/user/option/get").then(data => {
-      //console.log(data.data);
-      var _temp = []
-      var _tempOption = {}
-      for(let i=0;i<data.data.role.length;i++) {
-        _temp.push(data.data.role[i].roleid)
-
-        _tempOption = {}
-        _tempOption['value'] = data.data.role[i].roleid
-        _tempOption['desc'] = data.data.role[i].rolename
-        this.options.push(_tempOption)
-      }
-      this.cols[2].source = _temp
-
-      _temp = []
-      for(let i=0;i<data.data.role.length;i++) {
-        _temp.push(data.data.role[i].roleid+' - '+data.data.role[i].rolename)
-      }
-      this.colsEdit[4].source = _temp
-      
-      this.hotSettings.columns = this.cols;
-      this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)
-
-    })
-  }
-  getUserColWidth = () => {  //on startup function
-    API.get("/api/credential/user/preference/get?page=user&component=colWidths").then(data => {
+    let token = localStorage.getItem('id_token');
+   
+    API.post("/credential_service/get_user",{
+      key: token,
+      userId: '1'
+    }
     
-      this.colsWidth = JSON.parse(data.data.preference)
-
-      this.hotSettings.colWidths = this.colsWidth;
-      this.hotSettings.width = '100%'
-      this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)
-    })
-  }
-  rowInsert = () => {  //add row
-    let _tempLength = this.hotTableComponent.current.hotInstance.getData().length
+    ).then(data => {
+      console.log(data.data.data)
+      this.setState({
+        dataSet: data.data.data
+      });
+      for(let i=0;i<data.data.data.length;i++){
+        getUserDept(this.state.dept, data.data.data[0].dept_id,i);
   
-    this.setState(prevState => ({
-      irnumber: prevState.irnumber+1
-    }),() => {
-      this.hotTableComponent.current.hotInstance.alter('insert_row', _tempLength)
-      this.hotTableComponent.current.hotInstance.setDataAtCell(_tempLength,1,this.state.irnumber,'IR')
+      }
     })
-  }
-  rowAdd = () => {  //edit row
-    let _tempState = {}
-    let _valid, _invalid, _invalidmsg
-    for(let i=0;i<this.cols.length;i++) {
-      _valid = this.cols[i].data+'valid'
-      _invalid = this.cols[i].data+'invalid'
-      _invalidmsg = this.cols[i].data+'invalidmsg'
-      
-      _tempState[this.cols[i].data] = ''
-      _tempState[_valid] = false
-      _tempState[_invalid] = false
-      _tempState[_invalidmsg] = null
-    }
-    _tempState.modalAdd = !this.state.modalAdd
-    _tempState.selRow = this.hotTableComponent.current.hotInstance.getSourceData()+1
-
-    this.setState(
-      _tempState
-    , () => {
-      // for(let i=2;i<this.cols.length;i++) {
-      //   this.cols[i].readOnly = false;
-      // }
-    })
-
-    // this.setState({
-    //   modalAdd : !this.state.modalAdd
-    // }, () => {
     
-    // })
   }
-  rowEdit = () => {  //edit row
-    if(this.hotTableComponent.current.hotInstance.getSelected()==undefined) {
-      alert("Please select 1 row")
-    } else if(this.hotTableComponent.current.hotInstance.getSelected().length>1) {
-      alert("Only 1 row(s) allowed")
-    } else if(this.hotTableComponent.current.hotInstance.getSelected()[0][0]!=this.hotTableComponent.current.hotInstance.getSelected()[0][2]) {
-      alert("Only 1 row(s) allowed")
-    } else {
-      //console.log(this.hotTableComponent.current.hotInstance.getSourceDataAtRow(this.hotTableComponent.current.hotInstance.getSelected()[0][0]))
-      // console.log(this.hotTableComponent.current.hotInstance.getSourceDataAtRow(this.hotTableComponent.current.hotInstance.getSelected()[0][0]))
-      // console.log(this.hotTableComponent.current.hotInstance.getDataAtRow(this.hotTableComponent.current.hotInstance.getSelected()[0][0])) 
+  
+  getOptionData = () => {  //on startup function
+    let token = localStorage.getItem('id_token');
+    API.post("/credential_service/get_user",{
+      key: token,
+      userId: '1'
+    }).then(data => {
+      console.log(data.data.data);
+      
+    
+      // this.cols[1].source = data.data.data[0].role_id
 
-      this.selRowData = this.hotTableComponent.current.hotInstance.getDataAtRow(this.hotTableComponent.current.hotInstance.getSelected()[0][0])
-      let _tempState = {}
-      let _valid, _invalid, _invalidmsg
-      for(let i=0;i<this.cols.length;i++) {
-        _valid = this.cols[i].data+'valid'
-        _invalid = this.cols[i].data+'invalid'
-        _invalidmsg = this.cols[i].data+'invalidmsg'
-        
-        _tempState[this.cols[i].data] = this.hotTableComponent.current.hotInstance.getDataAtRow(this.hotTableComponent.current.hotInstance.getSelected()[0][0])[i]
-        _tempState[_valid] = false
-        _tempState[_invalid] = false
-        _tempState[_invalidmsg] = null
-      }
-      _tempState.modalEdit = !this.state.modalEdit
-      _tempState.selRow = this.hotTableComponent.current.hotInstance.getSelected()[0][0]+1
-      // _tempState.selRow = this.hotTableComponent.current.hotInstance.getDataAtCell(this.hotTableComponent.current.hotInstance.getSelected()[0][0],0)
-      //console.log(this.hotTableComponent.current.hotInstance.getDataAtCell(this.hotTableComponent.current.hotInstance.getSelected()[0][0],0))
-      this.setState(
-        _tempState
-      , () => {
-        for(let i=2;i<this.cols.length;i++) {
-          this.cols[i].readOnly = false;
-        }
+    
+      
+      // this.hotSettings.columns = this.cols;
+      // this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)
+
+    })
+  }
+  // getUserColWidth = () => {  //on startup function
+  //   API.get("/credential-service/user/preference/get?page=user&component=colWidths").then(data => {
+    
+  //     this.colsWidth = JSON.parse(data.data.preference)
+
+  //     this.hotSettings.colWidths = this.colsWidth;
+  //     this.hotSettings.width = '100%'
+  //     this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)
+  //   })
+  // }
+  // rowInsert = () => {  //add row
+  //   let _tempLength = this.hotTableComponent.current.hotInstance.getData().length
+  
+  //   this.setState(prevState => ({
+  //     irnumber: prevState.irnumber+1
+  //   }),() => {
+  //     this.hotTableComponent.current.hotInstance.alter('insert_row', _tempLength)
+  //     this.hotTableComponent.current.hotInstance.setDataAtCell(_tempLength,1,this.state.irnumber,'IR')
+  //   })
+  // }
+     rowAdd = () => {  //edit row
+          this.setState({
+            isOpen:true,
+            actionForm:"ADD USER"
+          })
+          this.props.membuka();
+     }
+     rowEdit = () => {  //edit row
+      this.setState({
+        isOpen:true,
+        actionForm:"EDIT USER"
       })
-    }
-  }
-  rowDelete = () => {  //delete row
-    if(this.hotTableComponent.current.hotInstance.getSelected()==undefined) {
-      alert("Please select row")
-    } else {
-      let _selected = this.hotTableComponent.current.hotInstance.getSelected()
-      let _startRow = 0;
-      let _endRow = 0;
-      let _arrayInstruction = []
+      this.props.membuka();
+ }
+  // rowEdit = () => {  //edit row
+  //   if(this.hotTableComponent.current.hotInstance.getSelected()==undefined) {
+  //     alert("Please select 1 row")
+  //   } else if(this.hotTableComponent.current.hotInstance.getSelected().length>1) {
+  //     alert("Only 1 row(s) allowed")
+  //   } else if(this.hotTableComponent.current.hotInstance.getSelected()[0][0]!=this.hotTableComponent.current.hotInstance.getSelected()[0][2]) {
+  //     alert("Only 1 row(s) allowed")
+  //   } else {
+  //     //console.log(this.hotTableComponent.current.hotInstance.getSourceDataAtRow(this.hotTableComponent.current.hotInstance.getSelected()[0][0]))
+  //     // console.log(this.hotTableComponent.current.hotInstance.getSourceDataAtRow(this.hotTableComponent.current.hotInstance.getSelected()[0][0]))
+  //     // console.log(this.hotTableComponent.current.hotInstance.getDataAtRow(this.hotTableComponent.current.hotInstance.getSelected()[0][0])) 
 
-      for(let i=0;i<_selected.length;i++) {
-        _startRow = _selected[i][0]<=_selected[i][2]?_selected[i][0]:_selected[i][2]
-        _endRow = _selected[i][0]<=_selected[i][2]?_selected[i][2]:_selected[i][0]
-
-        let _tempArray = []
-        _tempArray[0] = _startRow
-        _tempArray[1] = _endRow-_startRow+1
-        _arrayInstruction.push(_tempArray)
-      }
-      this.hotTableComponent.current.hotInstance.alter('remove_row', _arrayInstruction);
-    }
-  }
-  arrayToObject = (input) => {
-    let _finalResult = []
-    let _tempRow = {}
-    for(let i=0;i<input.length;i++) {
-      _tempRow = {}
-      for(let j=0;j<input[i].length;j++) {
-        _tempRow[this.hotTableComponent.current.hotInstance.getCellMeta(0,j).prop] = input[i][j]
-      }
-      _finalResult.push(_tempRow)
-    }
-    //console.log(_finalResult)
-    return _finalResult
-  }
-  arrayToObject2 = (input) => {
-    let _finalResult = {}
-    for(let i=0;i<input.length;i++) {
-        _finalResult[this.hotTableComponent.current.hotInstance.getCellMeta(0,i).prop] = input[i]
-    }
-    //console.log(_finalResult)
-    return _finalResult
-  }
-  editRowCancel = () => {  //edit row cancel button
-    this.setState({
-      modalAction: 'editcancel'
-    }, () => {
-      let _tempSelRowData = Object.assign([], this.hotTableComponent.current.hotInstance.getSourceData())
-      _tempSelRowData[this.state.selRow-1] = Object.assign({}, this.arrayToObject2(this.selRowData))
-      
-      this.hotTableComponent.current.hotInstance.loadData(_tempSelRowData);
-    })
-  }
-  editRowSave = () => {  //edit row save button
-    this.setState({
-      modalAction: 'editsave'
-    }, () => {
-      //compare data and push to dataChanges
-      let _tempSelRowData = Object.assign([], this.hotTableComponent.current.hotInstance.getSourceData())
-      let _tempChanges = []
-      let _tempChangesAll = []
-      //find the correct index by ID and IR
-      let _newIndex
-      for(let i=0;i<_tempSelRowData.length;i++) {
-        if(_tempSelRowData[i]['id']==this.state.id && _tempSelRowData[i]['ir']==this.state.ir) {
-          _newIndex = i
-        }
-      }
-
-      for(let i=2;i<this.cols.length;i++) {
-        if(_tempSelRowData[_newIndex][this.cols[i].data] !== this.state[this.cols[i].data]) {
-          //push into changes
-          //[3, "username", null, "newuser_"]
-          _tempChanges = []
-          _tempChanges[0] = this.state.selRow-1//this.hotTableComponent.current.hotInstance.getDataAtCell(this.state.selRow-1,0)+'.'+this.hotTableComponent.current.hotInstance.getDataAtCell(this.state.selRow-1,1) //this.state.selRow-1
-          _tempChanges[1] = this.cols[i].data
-          _tempChanges[2] = _tempSelRowData[_newIndex][this.cols[i].data]
-          _tempChanges[3] = this.state[this.cols[i].data]
-          _tempChanges[4] = _tempSelRowData[_newIndex]['id']
-          _tempChanges[5] = _tempSelRowData[_newIndex]['ir']
-          _tempChangesAll.push(_tempChanges)
-        }
-      }
-      console.log(_tempChangesAll)
-      console.log(this.dataChanges)
-      let tempObject = {Action:"", RowNumber:null, RecordData:{}}
-      let isExists = false
-      
-      for(let r=0;r<_tempChangesAll.length;r++) {
-        isExists = false
-
-        for(let i=0;i<this.dataChanges.length;i++) {
-          console.log(this.dataChanges[i].id)
-          console.log(_tempChangesAll[r][4])
-          console.log('==========')
-          //if(this.dataChanges[i].RowNumber==_tempChangesAll[r][0]) {
-          if(this.dataChanges[i].id==_tempChangesAll[r][4]&&this.dataChanges[i].ir==_tempChangesAll[r][5]) {
-              isExists = true
-          //tempObject.RecordData[changes[0][1]] = changes[0][3]
-          this.dataChanges[i].RecordData[_tempChangesAll[r][1]] = _tempChangesAll[r][3]
-          }
-        }
+  //     this.selRowData = this.hotTableComponent.current.hotInstance.getDataAtRow(this.hotTableComponent.current.hotInstance.getSelected()[0][0])
+  //     let _tempState = {}
+  //     let _valid, _invalid, _invalidmsg
+  //     for(let i=0;i<this.cols.length;i++) {
+  //       _valid = this.cols[i].data+'valid'
+  //       _invalid = this.cols[i].data+'invalid'
+  //       _invalidmsg = this.cols[i].data+'invalidmsg'
         
-        if(isExists == false) {
-          if(_tempChangesAll[r][4]==undefined||_tempChangesAll[r][4]==null) { //if(_tempChangesAll[r][2]==undefined) { //new record
-            tempObject.Action = 'I'
-            tempObject.id = _tempChangesAll[r][4]//this.hotTableComponent.current.hotInstance.getDataAtCell(_tempChangesAll[r][0],0)
-            tempObject.ir = _tempChangesAll[r][5]//this.hotTableComponent.current.hotInstance.getDataAtCell(_tempChangesAll[r][0],1)
-            tempObject.RecordData[_tempChangesAll[r][1]] = _tempChangesAll[r][3]
-          } else { //update record
-            tempObject.Action = 'U'
-            tempObject.id = _tempChangesAll[r][4]//this.hotTableComponent.current.hotInstance.getDataAtCell(_tempChangesAll[r][0],0)
-            tempObject.ir = _tempChangesAll[r][5]//this.hotTableComponent.current.hotInstance.getDataAtCell(_tempChangesAll[r][0],1)
-            tempObject.RecordData[_tempChangesAll[r][1]] = _tempChangesAll[r][3]
-          }
-          this.dataChanges.push(tempObject)
-        }
-      }
+  //       _tempState[this.cols[i].data] = this.hotTableComponent.current.hotInstance.getDataAtRow(this.hotTableComponent.current.hotInstance.getSelected()[0][0])[i]
+  //       _tempState[_valid] = false
+  //       _tempState[_invalid] = false
+  //       _tempState[_invalidmsg] = null
+  //     }
+  //     _tempState.modalEdit = !this.state.modalEdit
+  //     _tempState.selRow = this.hotTableComponent.current.hotInstance.getSelected()[0][0]+1
+  //     // _tempState.selRow = this.hotTableComponent.current.hotInstance.getDataAtCell(this.hotTableComponent.current.hotInstance.getSelected()[0][0],0)
+  //     //console.log(this.hotTableComponent.current.hotInstance.getDataAtCell(this.hotTableComponent.current.hotInstance.getSelected()[0][0],0))
+  //     this.setState(
+  //       _tempState
+  //     , () => {
+  //       for(let i=2;i<this.cols.length;i++) {
+  //         this.cols[i].readOnly = false;
+  //       }
+  //     })
+  //   }
+  // }
+ 
+  rowDelete = (e) => {  //delete row
+    let hasil = "";
+   
 
-      //first approach : using datasource replacement
-      //_tempSelRowData = Object.assign([], this.hotTableComponent.current.hotInstance.getSourceData())
+    
+    for(let i=0;i<this.props.jumlah.selectedId.length;i++){
+      let token = localStorage.getItem('id_token');
+   
+      API.post("/credential_service/delete_user",{
+        key: token,
+        userId: this.props.jumlah.selectedId[i]
+      }).then(data => {
+      alert("User ID "+this.props.jumlah.selectedId[i]+" "+data.data.data);
+     
+    })
+    
+  }
+}
+  // editRowCancel = () => {  //edit row cancel button
+  //   this.setState({
+  //     modalAction: 'editcancel'
+  //   }, () => {
+  //     let _tempSelRowData = Object.assign([], this.hotTableComponent.current.hotInstance.getSourceData())
+  //     _tempSelRowData[this.state.selRow-1] = Object.assign({}, this.arrayToObject2(this.selRowData))
+      
+  //     this.hotTableComponent.current.hotInstance.loadData(_tempSelRowData);
+  //   })
+  // }
+  // editRowSave = () => {  //edit row save button
+  //   this.setState({
+  //     modalAction: 'editsave'
+  //   }, () => {
+  //     //compare data and push to dataChanges
+  //     let _tempSelRowData = Object.assign([], this.hotTableComponent.current.hotInstance.getSourceData())
+  //     let _tempChanges = []
+  //     let _tempChangesAll = []
+  //     //find the correct index by ID and IR
+  //     let _newIndex
+  //     for(let i=0;i<_tempSelRowData.length;i++) {
+  //       if(_tempSelRowData[i]['id']==this.state.id && _tempSelRowData[i]['ir']==this.state.ir) {
+  //         _newIndex = i
+  //       }
+  //     }
+
+  //     for(let i=2;i<this.cols.length;i++) {
+  //       if(_tempSelRowData[_newIndex][this.cols[i].data] !== this.state[this.cols[i].data]) {
+  //         //push into changes
+  //         //[3, "username", null, "newuser_"]
+  //         _tempChanges = []
+  //         _tempChanges[0] = this.state.selRow-1//this.hotTableComponent.current.hotInstance.getDataAtCell(this.state.selRow-1,0)+'.'+this.hotTableComponent.current.hotInstance.getDataAtCell(this.state.selRow-1,1) //this.state.selRow-1
+  //         _tempChanges[1] = this.cols[i].data
+  //         _tempChanges[2] = _tempSelRowData[_newIndex][this.cols[i].data]
+  //         _tempChanges[3] = this.state[this.cols[i].data]
+  //         _tempChanges[4] = _tempSelRowData[_newIndex]['id']
+  //         _tempChanges[5] = _tempSelRowData[_newIndex]['ir']
+  //         _tempChangesAll.push(_tempChanges)
+  //       }
+  //     }
+  //     console.log(_tempChangesAll)
+  //     console.log(this.dataChanges)
+  //     let tempObject = {Action:"", RowNumber:null, RecordData:{}}
+  //     let isExists = false
+      
+  //     for(let r=0;r<_tempChangesAll.length;r++) {
+  //       isExists = false
+
+  //       for(let i=0;i<this.dataChanges.length;i++) {
+  //         console.log(this.dataChanges[i].id)
+  //         console.log(_tempChangesAll[r][4])
+  //         console.log('==========')
+  //         //if(this.dataChanges[i].RowNumber==_tempChangesAll[r][0]) {
+  //         if(this.dataChanges[i].id==_tempChangesAll[r][4]&&this.dataChanges[i].ir==_tempChangesAll[r][5]) {
+  //             isExists = true
+  //         //tempObject.RecordData[changes[0][1]] = changes[0][3]
+  //         this.dataChanges[i].RecordData[_tempChangesAll[r][1]] = _tempChangesAll[r][3]
+  //         }
+  //       }
+        
+  //       if(isExists == false) {
+  //         if(_tempChangesAll[r][4]==undefined||_tempChangesAll[r][4]==null) { //if(_tempChangesAll[r][2]==undefined) { //new record
+  //           tempObject.Action = 'I'
+  //           tempObject.id = _tempChangesAll[r][4]//this.hotTableComponent.current.hotInstance.getDataAtCell(_tempChangesAll[r][0],0)
+  //           tempObject.ir = _tempChangesAll[r][5]//this.hotTableComponent.current.hotInstance.getDataAtCell(_tempChangesAll[r][0],1)
+  //           tempObject.RecordData[_tempChangesAll[r][1]] = _tempChangesAll[r][3]
+  //         } else { //update record
+  //           tempObject.Action = 'U'
+  //           tempObject.id = _tempChangesAll[r][4]//this.hotTableComponent.current.hotInstance.getDataAtCell(_tempChangesAll[r][0],0)
+  //           tempObject.ir = _tempChangesAll[r][5]//this.hotTableComponent.current.hotInstance.getDataAtCell(_tempChangesAll[r][0],1)
+  //           tempObject.RecordData[_tempChangesAll[r][1]] = _tempChangesAll[r][3]
+  //         }
+  //         this.dataChanges.push(tempObject)
+  //       }
+  //     }
+
+  //     //first approach : using datasource replacement
+  //     //_tempSelRowData = Object.assign([], this.hotTableComponent.current.hotInstance.getSourceData())
       
 
-      for(let i=0;i<this.cols.length;i++) {
-        _tempSelRowData[_newIndex][this.cols[i].data] = this.state[this.cols[i].data]
-        //validate
-        let _valid = this.cols[i].data+'valid'
-        let _invalid = this.cols[i].data+'invalid'
-        let _invalidmsg = this.cols[i].data+'invalidmsg'
-        let validation = this.basicValidator(this.cols[i].data,this.state[this.cols[i].data])
-        this.setState(
-          {
-            [_valid]: validation.valid,
-            [_invalid]: !validation.valid,
-            [_invalidmsg]: validation.message
-          }, () => { 
+  //     for(let i=0;i<this.cols.length;i++) {
+  //       _tempSelRowData[_newIndex][this.cols[i].data] = this.state[this.cols[i].data]
+  //       //validate
+  //       let _valid = this.cols[i].data+'valid'
+  //       let _invalid = this.cols[i].data+'invalid'
+  //       let _invalidmsg = this.cols[i].data+'invalidmsg'
+  //       let validation = this.basicValidator(this.cols[i].data,this.state[this.cols[i].data])
+  //       this.setState(
+  //         {
+  //           [_valid]: validation.valid,
+  //           [_invalid]: !validation.valid,
+  //           [_invalidmsg]: validation.message
+  //         }, () => { 
             
-          }
-        )
-      }
-      this.hotTableComponent.current.hotInstance.loadData(_tempSelRowData)
-    })
-  }
+  //         }
+  //       )
+  //     }
+  //     this.hotTableComponent.current.hotInstance.loadData(_tempSelRowData)
+  //   })
+  // }
   componentWillMount() {
     Promise.all([
-      Promise.resolve(this.getUserColWidth()),
-      Promise.resolve(this.getOptionData()),
+      // // Promise.resolve(this.getUserColWidth()),
+      // Promise.resolve(this.getOptionData()),
       Promise.resolve(this.getUserData()) 
     ]).then(values => {
       console.log("ALL COMPLETED")
       console.log(values)
     })
+   
+    
+  }
+  componentDidUpdate(prevProps, prevState, ss){
+    if(prevState.dataSet!=this.state.dataSet){
+      // this.getUserData();
+      console.log("hay")
+
+    }else{
+      console.log("cuy")
+    }
+    // console.log(this.props.jumlah)
   }
   toggleModalEdit = () => {
     this.setState({
@@ -985,18 +1015,25 @@ class UserView extends Component {
     const { file } = this.state;
     return (
         <div id="hot-app">
-          {this.state.btnEdit ? <Button color="warning" id="btnTableEdit" className="btn-pill" onClick={this.tableEdit}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-edit"></i>&nbsp;<span>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></Button> : null}
-          {this.state.btnEdit ? <Button color="info" id="btnTableDownload"  className="btn-pill" onClick={this.tableDownload}><i className="fa fa-cloud-download"></i>&nbsp;<span>Download</span></Button> : null}
+          <Button color="dark" id="btnRowAdd" className="btn-pill" onClick={this.rowAdd}>&nbsp;&nbsp;<i className="fa fa-plus-square"></i>&nbsp;<span>Add&nbsp;&nbsp;</span></Button>
+          {this.props.jumlah.selectedUser>0?<Button color="danger" id="btnRowDelete" className="btn-pill" onClick={this.rowDelete}><i className="fa fa-window-close"></i>&nbsp;<span>Delete</span></Button>:''}
+          {this.props.jumlah.selectedUser==1?<Button color="warning" id="btnTableEdit" className="btn-pill" onClick={this.rowEdit}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-edit"></i>&nbsp;<span>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></Button> : null}
+        
 
-          {this.state.btnSave ? <Button color="secondary" id="btnTableEditReset" className="btn-pill" onClick={this.tableReset}><i className="fa fa-undo"></i>&nbsp;<span>Cancel</span></Button> : null}
-          {this.state.btnSave ? <Button color="success" id="btnTableEditSave" className="btn-pill" onClick={this.tableSave}>&nbsp;&nbsp;<i className="fa fa-save"></i>&nbsp;<span>Save</span>&nbsp;&nbsp;</Button> : null}
-          {this.state.btnSave ? <Button color="dark" id="btnRowAdd" className="btn-pill" onClick={this.rowAdd}>&nbsp;&nbsp;<i className="fa fa-plus-square"></i>&nbsp;<span>Add&nbsp;&nbsp;</span></Button> : null}
-          {this.state.btnSave ? <Button color="dark" id="btnRowEdit" className="btn-pill" onClick={this.rowEdit}>&nbsp;&nbsp;<i className="fa fa-pencil-square"></i>&nbsp;<span>Edit&nbsp;&nbsp;</span></Button> : null}
-          {this.state.btnSave ? <Button color="dark" id="btnRowDelete" className="btn-pill" onClick={this.rowDelete}><i className="fa fa-window-close"></i>&nbsp;<span>Delete</span></Button> : null}
-          {this.state.btnSave ? <Button color="primary" id="btnRowInsert" className="btn-pill" onClick={this.toggleModalInsert}>&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-clone"></i>&nbsp;<span>Insert&nbsp;&nbsp;&nbsp;&nbsp;</span></Button> : null}
+          {/* {this.state.btnSave ? <Button color="secondary" id="btnTableEditReset" className="btn-pill" onClick={this.tableReset}><i className="fa fa-undo"></i>&nbsp;<span>Cancel</span></Button> : null} */}
+          {/* {this.state.btnSave ? <Button color="success" id="btnTableEditSave" className="btn-pill" onClick={this.tableSave}>&nbsp;&nbsp;<i className="fa fa-save"></i>&nbsp;<span>Save</span>&nbsp;&nbsp;</Button> : null} */}
+          {/* {this.state.btnSave ? <Button color="dark" id="btnRowAdd" className="btn-pill" onClick={this.rowAdd}>&nbsp;&nbsp;<i className="fa fa-plus-square"></i>&nbsp;<span>Add&nbsp;&nbsp;</span></Button> : null} */}
+          {/* {this.state.btnSave ? <Button color="dark" id="btnRowEdit" className="btn-pill" onClick={this.rowEdit}>&nbsp;&nbsp;<i className="fa fa-pencil-square"></i>&nbsp;<span>Edit&nbsp;&nbsp;</span></Button> : null} */}
+          {/* {this.state.btnSave ? <Button color="dark" id="btnRowDelete" className="btn-pill" onClick={this.rowDelete}><i className="fa fa-window-close"></i>&nbsp;<span>Delete</span></Button> : null} */}
+          {/* {this.state.btnSave ? <Button color="primary" id="btnRowInsert" className="btn-pill" onClick={this.toggleModalInsert}>&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-clone"></i>&nbsp;<span>Insert&nbsp;&nbsp;&nbsp;&nbsp;</span></Button> : null} */}
           
-          
+         
           <Button color="light" id="btnFilter"  className="btn-pill" onClick={this.tableFilter}>&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-filter"></i>&nbsp;<span>Filter&nbsp;&nbsp;&nbsp;&nbsp;</span></Button>
+         
+            <Button style={{marginLeft:"30px"}} color="info" id="btnTableDownload"  className="btn-pill" onClick={this.tableDownload}><i className="fa fa-cloud-download"></i>&nbsp;<span>Download</span></Button>
+            {/* <Button color="info" id="btnTableUpload"  className="btn-pill" onClick={this.tableDownload}><i className="fa fa-cloud-download"></i>&nbsp;<span>Download</span></Button> */}
+
+          
           {/* <a href={`http://localhost:3001/api/credential/user/download/excel`} >Download</a> */}
           <Modal isOpen={this.state.modalEdit} toggle={this.toggleModalEdit}
                   className={'modal-lg ' + this.props.className}>
@@ -1128,10 +1165,16 @@ class UserView extends Component {
               </Card>
             </ModalBody>
           </Modal>
-          <HotTable ref={this.hotTableComponent} id="hot2" settings={this.hotSettings} licenseKey="non-commercial-and-evaluation" />
+        <Table data={this.state.dataSet} name="user" deptName={[...this.state.dept]}/>
+        <Dialog open={this.state.isOpen} actionForm={this.state.actionForm}></Dialog>
+          {/* <HotTable ref={this.hotTableComponent} id="hot2" settings={this.hotSettings} licenseKey="non-commercial-and-evaluation" /> */}
         </div>
     )
   }
 }
 
-export default UserView;
+export default connect(userSelected1,mapDispatchToProps )(UserView);
+
+
+
+

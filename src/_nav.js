@@ -9,70 +9,92 @@ export default {
       },
     },
     {
-      name: 'Reports',
-      url: '/report',
-      icon: 'fa fa-file-o',
-    },
-    {
-      name: 'Kerno™',
-      url: '#',
-      icon: 'fa fa-align-justify',
-    },
-    {
-      title: true,
-      name: 'Configurations',
-      wrapper: {
-        element: '',
-        attributes: {},
-      },
-    },
-    {
-      name: 'Credentials',
+      name: 'User Setting',
       url: '#2',
       icon: 'fa fa-user-circle-o',
       children: [
         {
-          name: 'User ID',
-          url: '/credential/user',
+          name: 'User',
+          url: '/usersetting/user',
         },
         {
-          name: 'Roles',
-          url: '/credential/role',
+          name: 'Department',
+          url: '/usersetting/departement',
+        },
+        {
+          name: 'Group',
+          url: '/usersetting/group',
+        },
+        {
+          name: 'Reporting Branch',
+          url: '/usersetting/reportbranch',
         },
       ]
     },
+    
     {
-      name: 'Privileges',
-      url: '#2',
-      icon: 'fa fa-key',
+      name: 'Reports',
+      url: '/report',
+      icon: 'fa fa-file-o',
+      children: [
+        {
+          name: 'Report A',
+          url: '/report/reportA',
+        },
+        {
+          name: 'Report B',
+          url: '/report/reportB',
+        },
+        {
+          name: 'Report C',
+          url: '/report/reportC',
+        },
+        
+        
+        
+      ]
     },
+    {
+      name: 'Monitoring',
+      url: '#',
+      icon: 'fa fa-align-justify',
+      children:[]
+    },
+   
     {
       name: 'Workflow',
       url: '#2',
-      icon: 'fa fa-map-o',
-    },
-    {
-      name: 'Menu',
-      url: '#2',
       icon: 'fa fa-key',
+      children:[]
     },
     {
-      title: true,
-      name: 'Logs',
-      wrapper: {
-        element: '',
-        attributes: {},
-      },
+      name: 'Audit Trail',
+      url: '#2',
+      icon: 'fa fa-map-o',
+      children:[]
     },
-    {
-      name: 'User Logs',
-      url: '/theme/typography',
-      icon: 'icon-pencil',
-    },
-    {
-      name: 'Application Logs',
-      url: '/theme/typography',
-      icon: 'icon-pencil',
-    },
+    // {
+    //   name: 'Menu',
+    //   url: '#2',
+    //   icon: 'fa fa-key',
+    // },
+    // {
+    //   title: true,
+    //   name: 'Logs',
+    //   wrapper: {
+    //     element: '',
+    //     attributes: {},
+    //   },
+    // },
+    // {
+    //   name: 'User Logs',
+    //   url: '/theme/typography',
+    //   icon: 'icon-pencil',
+    // },
+    // {
+    //   name: 'Application Logs',
+    //   url: '/theme/typography',
+    //   icon: 'icon-pencil',
+    // },
   ],
 };

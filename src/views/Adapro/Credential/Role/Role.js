@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import { Row, Col } from 'reactstrap'
 import { rgbToHex } from '@coreui/coreui/dist/js/coreui-utilities'
-
+import Table from "./../../../../components/Table";
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import API from 'api';
@@ -260,8 +260,9 @@ class RoleView extends Component {
     }
   };
   getRoleData = () => {
-    API.get("/api/credential/role/get").then(data => {
+    API.post("/credential-service/get_role/").then(data => {
       console.log(data.data);
+      console.log(data);
       this.hotTableComponent.current.hotInstance.updateSettings({
         columns: this.cols,
         colHeaders: this.colsHeader
@@ -285,11 +286,12 @@ class RoleView extends Component {
         <button id="btnLock" onClick={this.lockTableData}>Lock</button>
         
         <a href={`http://localhost:3001/api/credential/role/download/excel`} >Download</a>
-
-        <HotTable ref={this.hotTableComponent} id="hot2" settings={this.hotSettings} licenseKey="non-commercial-and-evaluation" />
+        <Table data={this.dataSet}/>
+        {/* <HotTable ref={this.hotTableComponent} id="hot2" settings={this.hotSettings} licenseKey="non-commercial-and-evaluation" /> */}
       </div>
     )
   }
+  
 }
 
 export default RoleView;

@@ -2,13 +2,18 @@ import decode from 'jwt-decode';
 
 export default class authMethod {
     login = (username, password) => {
-        return this.fetch('http://localhost:3001/api/credential/login/authenticate', {
+        return this.fetch('http://localhost:5450/credential_service/login/', {
             method: 'POST',
+            
+            headers: {
+                'Content-Type': 'application/json',
+              },
             body: JSON.stringify({
                 username, password
             })
         }).then(res => {
-            this.setToken(res.token);
+            this.setToken(res.data);
+            console.log(res.data);
             return res;
         })
     }
