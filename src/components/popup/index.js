@@ -95,32 +95,45 @@ const [dataGroup, setDataGroup] = React.useState([]);
 const [dataRole, setDataRole] = React.useState([]);
 const [dataBranch, setDataBranch] = React.useState([]);
 let actionForm = props.actionForm;
+
+const isOpen = useSelector(state =>state.popup.isOpen);
+const selected = useSelector(state =>state.userSettingSelected);
 const getUserDetail = (id) => {  //on startup function
   let token = localStorage.getItem('id_token');
  
   API.post("/credential_service/get_user",{
     key: token,
-    user_id:id
+    user_id:id,
+    info_data:"detail"
   }).then(data => {
-      setUserId(data.data.data[0].user_id)
-      setUsername(data.data.data[0].username)
-      setPassword(data.data.data[0].password)
-      setName(data.data.data[0].name)
-      setNik(data.data.data[0].nik)
-      setPeriode(data.data.data[0].periode_usage)
-      setStatus(data.data.data[0].status_date)
-      setExpired(data.data.data[0].expired_date)
-      setBranch(data.data.data[0].branch_id)
-      setRole(data.data.data[0].role_id)
-      setDepart(data.data.data[0].dept_id)
-      setGroup(data.data.data[0].group_id)
+    
+      setUserId(data.data.data.user_id)
+      setUsername(data.data.data.username)
+      setPassword(data.data.data.password)
+      setName(data.data.data.name)
+      setNik(data.data.data.nik)
+      setPeriode(data.data.data.periode_usage)
+      setStatus(data.data.data.status_date)
+      setExpired(data.data.data.expired_date)
+      setBranch(data.data.data.branch_id)
+      setRole(data.data.data.role_id)
+      setDepart(data.data.data.dept_id)
+      setGroup(data.data.data.group_id)
     // this.setState({
     //   dataSet: data.data.data
     // });
   
   })
 }
-
+const kirimuserselected = (jumlah, data)=>{
+  return{
+    type:"SELECTEDUSER",
+    payload:{
+      selectedUser: jumlah,
+      selectedId:data
+    }
+  }
+}
 
 
 
@@ -189,8 +202,7 @@ const getUserDept = () => {  //on startup function
   }
 
 
-  const isOpen = useSelector(state =>state.popup.isOpen);
-  const selected = useSelector(state =>state.userSettingSelected);
+ 
 
 
   console.log(selected.selectedUser)
@@ -218,7 +230,8 @@ const getUserDept = () => {  //on startup function
   })
   const handleSubmitUser =(e)=>{
     let token = localStorage.getItem('id_token');
-   console.log(role)
+   console.log(role);
+   dispatch(kirimuserselected(0,[]))
    if(actionForm=="EDIT USER"){
     API.post("/credential_service/update_user",{
       key: token,
@@ -239,12 +252,18 @@ const getUserDept = () => {  //on startup function
     
         // console.log(data.data)
         alert("berhasil Mengubah")
+        setOpen(false);
+        dispatch(kirimisOpen(false))
+        resetForm();
       // this.setState({
       //   dataSet: data.data.data
       // });
     
     }).catch((err)=>{
         alert("Anda Bukan Admin")
+        setOpen(false);
+        dispatch(kirimisOpen(false))
+        resetForm();
     })
    }else{
     API.post("/credential_service/create_user",{
@@ -266,6 +285,9 @@ const getUserDept = () => {  //on startup function
     
         // console.log(data.data)
         alert("berhasil menambah")
+        setOpen(false);
+        dispatch(kirimisOpen(false))
+        resetForm();
       // this.setState({
       //   dataSet: data.data.data
       // });
@@ -314,9 +336,27 @@ const getUserDept = () => {  //on startup function
   const handleClickOpen = () => {
     setOpen(true);
   };
+  const resetForm=()=>{
+    setUsername("");
+ 
+    setPassword("");
+ 
+    setNik("")
+    setName("")
+    setDepart("")
+    setUserId("")    
+    setGroup("")
+    setRole("")
+    setBranch("")
+    setPeriode("")
+    setExpired("")
+    setStatus("")
+  }
   const handleClose = () => {
     setOpen(false);
     dispatch(kirimisOpen(false))
+    resetForm();
+
   };
  
   useEffect(()=>{
@@ -327,14 +367,17 @@ const getUserDept = () => {  //on startup function
       getUserGroup();
       getUserRole();
       getUserBranch();
-      if(actionForm=="EDIT USER"){
-        let id = selectedusersetting.selectedId;
     
+      if(actionForm=="EDIT USER"){
+        let id = selectedusersetting.selectedId[0];
+        console.log(id)
         getUserDetail(id);
+      }else{
+        resetForm();
       }
    
-  },[isOpen])
- 
+  },[isOpen, selectedusersetting])
+  const value = "ACCU-SEAL 35-532 Bag Sealer";
   return (
     <div >
       
@@ -348,8 +391,8 @@ const getUserDept = () => {  //on startup function
           <Grid container  spacing={3} >
            
 
-            <Grid  xs={12} sm={6}  md={4} >
-                <Grid style={{padding:"10px"}}>
+            <Grid  item  xs={12} sm={6}  md={4} >
+                <Grid item  style={{padding:"10px"}}>
                 <h6 style={{marginLeft:"10px"}}>1. User</h6>
                 <TextField
    style={{margin:"5px", width:"100%"}}
@@ -433,15 +476,16 @@ const getUserDept = () => {  //on startup function
                 </Grid>
             
             </Grid>
-            <Grid xs={12} sm={6} md={4} style={{width:"80%"}}  >
-               <Grid style={{padding:"10px"}}>
+            <Grid item  xs={12} sm={6} md={4} style={{width:"80%"}}  >
+               <Grid item  style={{padding:"10px"}}>
 <br></br>
                 <Autocomplete
   id="depart"
   name="depart"
+ 
   options={dataDepart}
-  value={dataDepart.find(v => v.dept_id == depart) || {}}
-  getOptionLabel={(option) => option.dept_name}
+  value={dataDepart.find(v => v.dept_id == depart)||{}}
+  getOptionLabel={(option) => option?option.dept_name:''}
   onChange={(e, value)=>handleChange(convert("depart",value?value.dept_id:''))}
   renderInput={(params) => <TextField name="depart" style={{margin:"5px",}} {...params} label="Departement" variant="outlined" />}
 />
@@ -451,7 +495,7 @@ const getUserDept = () => {  //on startup function
 id="group"
 name="group"
 options={dataGroup}
-value={dataGroup.find(v => v.group_id == group) || {}}
+value={dataGroup.find(v => v.group_id == group)||{}}
 getOptionLabel={(option) => option.group_name}
 onChange={(e, value)=>handleChange(convert("group", value?value.group_id:''))}
 renderInput={(params) => <TextField style={{margin:"5px"}} {...params} label="Group" variant="outlined" />}
@@ -460,8 +504,9 @@ renderInput={(params) => <TextField style={{margin:"5px"}} {...params} label="Gr
 
 id="role"
 name="role"
+
 options={dataRole}
-value={dataRole.find(v => v.role_id == role) || {}}
+value={dataRole.find(v => v.role_id == role)||{}}
 getOptionLabel={(option) => option.role_name}
 onChange={(e, value)=>handleChange(convert("role", value?value.role_id:''))}
 renderInput={(params) => <TextField style={{margin:"5px"}} {...params} label="Role" variant="outlined" />}
@@ -505,7 +550,7 @@ renderInput={(params) => <TextField style={{margin:"5px"}} {...params} label="Ro
                 </Grid>
           
               </Grid>
-            <Grid xs={12} sm={6} md={4} >
+            <Grid item  xs={12} sm={6} md={4} >
               <h6 style={{marginLeft:"10px"}}>2. Branch</h6>
             <Autocomplete
 

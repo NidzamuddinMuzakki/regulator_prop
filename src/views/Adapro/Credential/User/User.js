@@ -51,9 +51,10 @@ const mapDispatchToProps = dispatch =>{
   }
 }
 const userSelected1 = state => ({
-  jumlah: state.userSettingSelected
+  jumlah: state.userSettingSelected,
+  terbuka:state.popup
 })
-  
+
 
 class UserView extends Component {
   
@@ -64,7 +65,7 @@ class UserView extends Component {
       btnSave : false,
       btnFilter : false,
       saveClicked : false,
-      dataSet : [],
+      dataSet :  [],
       modalEdit: false,
       modalAdd: false,
       modalInsert: false,
@@ -617,7 +618,7 @@ class UserView extends Component {
    
     API.post("/credential_service/get_user",{
       key: token,
-      userId: '1'
+      info_data:'all'
     }
     
     ).then(data => {
@@ -737,6 +738,7 @@ class UserView extends Component {
         userId: this.props.jumlah.selectedId[i]
       }).then(data => {
       alert("User ID "+this.props.jumlah.selectedId[i]+" "+data.data.data);
+      this.getUserData();
      
     })
     
@@ -842,6 +844,9 @@ class UserView extends Component {
   //     this.hotTableComponent.current.hotInstance.loadData(_tempSelRowData)
   //   })
   // }
+  // componentDidMount() {
+  //   this.getUserData()
+  // }
   componentWillMount() {
     Promise.all([
       // // Promise.resolve(this.getUserColWidth()),
@@ -853,11 +858,14 @@ class UserView extends Component {
     })
    
     
-  }
+   }
   componentDidUpdate(prevProps, prevState, ss){
-    if(prevState.dataSet!=this.state.dataSet){
-      // this.getUserData();
-      console.log("hay")
+    if(prevState.isOpen!==this.props.terbuka.isOpen){
+      this.getUserData();
+      this.setState({
+        isOpen :this.props.terbuka.isOpen
+      })
+  
 
     }else{
       console.log("cuy")

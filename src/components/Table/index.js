@@ -226,10 +226,11 @@ export default function EnhancedTable(props) {
     return { id,no,username, name, password,role, nik, dept, group };
   }
   const rows = [];
+  
   let dataUser = props.data;
 console.log(dataUser)
   for(let i=0;i<dataUser.length;i++){
-    rows[i] = createData(dataUser[i].row_id,(i+1),dataUser[i].username, dataUser[i].name, dataUser[i].password,dataUser[i].role_id, dataUser[i].nik,dataUser[i].dept_id, dataUser[i].group_id);
+    rows[i] = createData(dataUser[i].user_id,(i+1),dataUser[i].username, dataUser[i].name, dataUser[i].password,dataUser[i].role_id, dataUser[i].nik,dataUser[i].dept_id, dataUser[i].group_id);
     
   }
 
@@ -283,7 +284,7 @@ console.log(dataUser)
     if (event.target.checked) {
       const newSelecteds = rows.map((n) => n.id);
       let jumlah = newSelecteds.length;
-
+      
    
       dispatch(kirimuserselected(jumlah,newSelecteds))
       setSelected(newSelecteds);
@@ -295,7 +296,7 @@ console.log(dataUser)
   useEffect(()=>{
     if(selected.length>0){
       setHiding("block");
-    
+     
 
         
       
@@ -303,7 +304,10 @@ console.log(dataUser)
       setHiding("none")
     }
    
-  },[selected, props.data])
+  },[selected])
+  useEffect(()=>{
+    setSelected([]);
+  }, [props.data])
   const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
     

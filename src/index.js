@@ -14,7 +14,7 @@ import popup from './reducers/popup';
 const rootReducer =createStore(combineReducers({
     userSettingSelected, popup
     
-}));
+}),window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 ReactDOM.render(<Provider store={rootReducer}><App /></Provider>, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
