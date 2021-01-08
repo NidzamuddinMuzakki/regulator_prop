@@ -90,22 +90,14 @@ function EnhancedTableHead(props) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align="center"
-            padding={'none'}
+           
+            padding={'default'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
-              onClick={createSortHandler(headCell.id)}
-            >
+           
               {headCell.label}
-              {orderBy === headCell.id ? (
-                <span className={classes.visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                </span>
-              ) : null}
-            </TableSortLabel>
+             
+           
           </TableCell>
         ))}
       </TableRow>
@@ -220,17 +212,16 @@ export default function EnhancedTable(props) {
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   let deptName = [];
-  console.log(props.deptName.map(x=>console.log(x)));
-  console.log(deptName[0])
+  
   function createData(id,no,username, name, password,role,nik, dept, group) {
     return { id,no,username, name, password,role, nik, dept, group };
   }
   const rows = [];
   
   let dataUser = props.data;
-console.log(dataUser)
+console.log(props.deptName[0])
   for(let i=0;i<dataUser.length;i++){
-    rows[i] = createData(dataUser[i].user_id,(i+1),dataUser[i].username, dataUser[i].name, dataUser[i].password,dataUser[i].role_id, dataUser[i].nik,dataUser[i].dept_id, dataUser[i].group_id);
+    rows[i] = createData(dataUser[i].user_id,(i+1),dataUser[i].username, dataUser[i].name, dataUser[i].password,props.roleName[i], dataUser[i].nik,props.deptName[i], props.groupName[i]);
     
   }
 
@@ -389,7 +380,7 @@ console.log(dataUser)
                   
                   const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${row.id}`;
-                  console.log(row)
+                  
                   return (
                     <TableRow
                       id="rowcheck"
@@ -404,7 +395,7 @@ console.log(dataUser)
                       key={row.id}
                       selected={isItemSelected}
                     >
-                      <TableCell padding="checkbox">
+                      <TableCell  padding="checkbox">
                         <Checkbox style={{display:hiding}}
                           checked={isItemSelected}
                           inputProps={{ 'aria-labelledby': labelId }}
@@ -413,7 +404,7 @@ console.log(dataUser)
                       <TableCell >
                         {row.no}
                       </TableCell>
-                      <TableCell >
+                      <TableCell  >
                         {row.username}
                       </TableCell>
                       <TableCell  >{row.name}</TableCell>
@@ -422,7 +413,7 @@ console.log(dataUser)
                       <TableCell  >{row.role}</TableCell>
                       <TableCell >{row.nik}</TableCell>
                       
-                      <TableCell align="center" >{row.dept}</TableCell>
+                      <TableCell  >{row.dept}</TableCell>
                    
                       <TableCell >{row.group}</TableCell>
                       

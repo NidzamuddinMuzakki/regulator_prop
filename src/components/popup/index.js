@@ -21,7 +21,10 @@ import PersonIcon from '@material-ui/icons/Person';
 import { useSelector, useDispatch } from 'react-redux';
 const useStyles = makeStyles((theme) => ({
   root: {
-
+   
+  },
+  back:{
+    background:"#ebeff1"
   },
   paper: {
     height: 140,
@@ -30,6 +33,11 @@ const useStyles = makeStyles((theme) => ({
   control: {
     padding: theme.spacing(2),
   },
+  popup:{
+    "&:hover":{
+      boxShadow: "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px"
+    }
+  }
 }));
 const styles = (theme) => ({
   root: {
@@ -80,18 +88,34 @@ export default function CustomizedDialogs(props) {
     return local.toJSON().slice(0, 10);
   });
   const selectedusersetting = useSelector(state => state.userSettingSelected);
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [name, setName] = React.useState("");
-  const [userid, setUserId] = React.useState("");
-  const [group, setGroup] = React.useState(0);
-  const [nik, setNik] = React.useState("");
-  const [depart, setDepart] = React.useState(0);
-  const [role, setRole] = React.useState(0);
-  const [periode, setPeriode] = React.useState(0);
-  const [branch, setBranch] = React.useState(0);
-  const [expired, setExpired] = React.useState("");
-  const [status, setStatus] = React.useState("");
+  // const [username, setUsername] = React.useState("");
+  // const [password, setPassword] = React.useState("");
+  // const [name, setName] = React.useState("");
+  // const [userid, setUserId] = React.useState("");
+  // const [group, setGroup] = React.useState(0);
+  // const [nik, setNik] = React.useState("");
+  // const [depart, setDepart] = React.useState(0);
+  // const [role, setRole] = React.useState(0);
+  // const [periode, setPeriode] = React.useState(0);
+  // const [branch, setBranch] = React.useState(0);
+  // const [expired, setExpired] = React.useState("");
+  // const [status, setStatus] = React.useState("");
+  const [dataChange, setDataChange] = React.useState({
+    username:"",
+    password:"",
+    name:"",
+    user_id:0,
+    group_id:0,
+    nik:"",
+    dept_id:0,
+    role_id:0,
+    periode_usage:"",
+    branch_id:0,
+    expired_date:"",
+    status_date:""
+  })
+
+
   const [dataDepart, setDataDepart] = React.useState([]);
   const [dataGroup, setDataGroup] = React.useState([]);
   const [dataRole, setDataRole] = React.useState([]);
@@ -108,24 +132,39 @@ export default function CustomizedDialogs(props) {
       user_id: id,
       info_data: "detail"
     }).then(data => {
-
-      setUserId(data.data.data.user_id)
-      setUsername(data.data.data.username)
-      setPassword(data.data.data.password)
-      setName(data.data.data.name)
-      setNik(data.data.data.nik)
-      setPeriode(data.data.data.periode_usage)
-      setStatus(data.data.data.status_date)
-      setExpired(data.data.data.expired_date)
-      setBranch(data.data.data.branch_id)
-      setRole(data.data.data.role_id)
-      setDepart(data.data.data.dept_id)
-      setGroup(data.data.data.group_id)
+      let uaja = data.data.data;
+      setDataChange({
+        username:uaja.username,
+        password:uaja.password,
+        name:uaja.name,
+        user_id:uaja.user_id,
+        group_id:uaja.group_id,
+        nik:uaja.nik,
+        dept_id:uaja.dept_id,
+        role_id:uaja.role_id,
+        periode_usage:uaja.periode_usage,
+        branch_id:uaja.branch_id,
+        expired_date:uaja.expired_date,
+        status_date:uaja.status_date
+      }) 
+    })
+      // setUserId(data.data.data.user_id)
+      // setUsername(data.data.data.username)
+      // setPassword(data.data.data.password)
+      // setName(data.data.data.name)
+      // setNik(data.data.data.nik)
+      // setPeriode(data.data.data.periode_usage)
+      // setStatus(data.data.data.status_date)
+      // setExpired(data.data.data.expired_date)
+      // setBranch(data.data.data.branch_id)
+      // setRole(data.data.data.role_id)
+      // setDepart(data.data.data.dept_id)
+      // setGroup(data.data.data.group_id)
       // this.setState({
       //   dataSet: data.data.data
       // });
 
-    })
+    
   }
   const kirimuserselected = (jumlah, data) => {
     return {
@@ -172,7 +211,7 @@ export default function CustomizedDialogs(props) {
 
     })
   }
-  const getUserRole = () => {  //on startup function
+  const getUserRole =  React.useCallback(() => {  //on startup function
     let token = localStorage.getItem('id_token');
 
     API.post("/credential_service/get_role", {
@@ -186,7 +225,7 @@ export default function CustomizedDialogs(props) {
       // });
 
     })
-  }
+  })
   const getUserBranch = () => {  //on startup function
     let token = localStorage.getItem('id_token');
 
@@ -207,7 +246,7 @@ export default function CustomizedDialogs(props) {
 
 
 
-  console.log(selected.selectedUser)
+  
   function getSelectedItem(databesar, datakecil) {
     const item = databesar.find((opt) => {
       if (opt.value == datakecil)
@@ -232,23 +271,23 @@ export default function CustomizedDialogs(props) {
   })
   const handleSubmitUser = (e) => {
     let token = localStorage.getItem('id_token');
-    console.log(role);
+    // console.log(role);
     dispatch(kirimuserselected(0, []))
     if (actionForm == "EDIT USER") {
       API.post("/credential_service/update_user", {
         key: token,
-        user_id: userid,
-        role_id: parseInt(role),
-        dept_id: depart,
-        group_id: group,
-        branch_id: branch,
-        nik: nik,
-        username: username,
-        name: name,
-        password: password,
-        periode_usage: periode,
-        expired_date: expired,
-        status_date: status,
+        user_id: dataChange.user_id,
+        role_id: dataChange.role_id,
+        dept_id: dataChange.dept_id,
+        group_id: dataChange.group_id,
+        branch_id: dataChange.branch_id,
+        nik: dataChange.nik,
+        username: dataChange.username,
+        name: dataChange.name,
+        password: dataChange.password,
+        periode_usage: dataChange.periode_usage,
+        expired_date: dataChange.expired_date,
+        status_date: dataChange.status_date,
 
       }).then(data => {
 
@@ -270,18 +309,19 @@ export default function CustomizedDialogs(props) {
     } else {
       API.post("/credential_service/create_user", {
         key: token,
-        user_id: userid,
-        role_id: role,
-        dept_id: depart,
-        group_id: group,
-        branch_id: branch,
-        nik: nik,
-        username: username,
-        name: name,
-        password: password,
-        periode_usage: periode,
-        expired_date: expired,
-        status_date: status,
+        
+        user_id: dataChange.user_id,
+        role_id: dataChange.role_id,
+        dept_id: dataChange.dept_id,
+        group_id:dataChange.group_id,
+        branch_id:dataChange.branch_id,
+        nik: dataChange.nik,
+        username: dataChange.username,
+        name: dataChange.name,
+        password: dataChange.password,
+        periode_usage: dataChange.periode_usage,
+        expired_date: dataChange.expired_date,
+        status_date: dataChange.status_date,
 
       }).then(data => {
 
@@ -298,36 +338,48 @@ export default function CustomizedDialogs(props) {
     }
   }
   const handleChange = (e) => {
-    let etarget = e.target.name;
-    console.log(e.target.name)
-    if (etarget == "username") {
-      setUsername(e.target.value);
-    } else if (etarget == "password") {
-      setPassword(e.target.value);
-    } else if (etarget == "nik") {
-      setNik(e.target.value)
-    } else if (etarget == "name") {
-      setName(e.target.value)
-    } else if (etarget == "depart") {
-      setDepart(e.target.value)
-    } else if (etarget == "userid") {
-      setUserId(e.target.value)
-    } else if (etarget == "group") {
-      setGroup(e.target.value)
-    } else if (etarget == "role") {
-      setRole(e.target.value)
-    } else if (etarget == "branch") {
-      console.log(e.target.value)
-      setBranch(e.target.value)
-    }
-    else if (etarget == "periode") {
-      console.log(e.target.name)
-      setPeriode(e.target.value)
-    } else if (etarget == "expired") {
-      setExpired(e.target.value)
-    } else if (etarget == "status") {
-      setStatus(e.target.value)
-    }
+
+      setDataChange({
+        ...dataChange,
+        [e.target.name]:e.target.value 
+      })
+    // let etarget = e.target.name;
+    // console.log(e.target.name)
+    // if (etarget == "username") {
+    //   setDataChange({
+    //     username:e.target.value
+    //   })
+    // }
+    // else if (etarget == "password") {
+    //     setDataChange({
+    //       password:e.target.value
+
+    //     } )
+    // }
+    // }  else if (etarget == "nik") {
+    //   setNik(e.target.value)
+    // } else if (etarget == "name") {
+    //   setName(e.target.value)
+    // } else if (etarget == "depart") {
+    //   setDepart(e.target.value)
+    // } else if (etarget == "userid") {
+    //   setUserId(e.target.value)
+    // } else if (etarget == "group") {
+    //   setGroup(e.target.value)
+    // } else if (etarget == "role") {
+    //   setRole(e.target.value)
+    // } else if (etarget == "branch") {
+    //   console.log(e.target.value)
+    //   setBranch(e.target.value)
+    // }
+    // else if (etarget == "periode") {
+    //   console.log(e.target.name)
+    //   setPeriode(e.target.value)
+    // } else if (etarget == "expired") {
+    //   setExpired(e.target.value)
+    // } else if (etarget == "status") {
+    //   setStatus(e.target.value)
+    // }
 
 
 
@@ -336,20 +388,20 @@ export default function CustomizedDialogs(props) {
     setOpen(true);
   };
   const resetForm = () => {
-    setUsername("");
-
-    setPassword("");
-
-    setNik("")
-    setName("")
-    setDepart("")
-    setUserId("")
-    setGroup("")
-    setRole("")
-    setBranch("")
-    setPeriode("")
-    setExpired("")
-    setStatus("")
+    setDataChange({
+      username:"",
+    password:"",
+    name:"",
+    user_id:0,
+    group_id:0,
+    nik:"",
+    dept_id:0,
+    role_id:0,
+    periode_usage:"",
+    branch_id:0,
+    expired_date:"",
+    status_date:""
+    })
   }
   const handleClose = () => {
     setOpen(false);
@@ -360,32 +412,32 @@ export default function CustomizedDialogs(props) {
 
   useEffect(() => {
     setOpen(isOpen)
-    console.log(isOpen)
+    
 
     getUserDept();
     getUserGroup();
     getUserRole();
     getUserBranch();
-
+  
     if (actionForm == "EDIT USER") {
       let id = selectedusersetting.selectedId[0];
-      console.log(id)
       getUserDetail(id);
     } else {
       resetForm();
     }
 
-  }, [isOpen, selectedusersetting])
+  }, [isOpen])
   const value = "ACCU-SEAL 35-532 Bag Sealer";
   return (
     <div >
 
       <Dialog
+     
         fullWidth={true}
-        maxWidth="lg"  onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
-        <DialogTitle style={{ boxShadow: "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px"}} id="customized-dialog-title" onClose={handleClose}>
+        maxWidth="lg" style={{ }}  onClose={handleClose}  aria-labelledby="customized-dialog-title" open={open}>
+        <DialogTitle style={{ }} id="customized-dialog-title" onClose={handleClose}>
           <div style={{ display: "flex", }}>
-            <Paper style={{ width: "50px", height: "50px", display: "flex", justifyContent: "center", alignItems: "center" }}><PersonIcon color={'#20a8d8'}></PersonIcon></Paper>
+            <Paper style={{ width: "50px", height: "50px", display: "flex", justifyContent: "center", alignItems: "center" }}><PersonIcon ></PersonIcon></Paper>
             <div style={{width: "300px", height: "50px",  marginLeft:"10px",alignItems:"center",justifyContent:"center" }}>
                 
                   <span color="primary" style={{display: "flex",lineHeight: "50px", fontFamily:"revert", color:"primary",}}  >ADD USER</span>
@@ -397,29 +449,29 @@ export default function CustomizedDialogs(props) {
         </DialogTitle>
 
         <DialogContent className={classes.root}  >
-          <Grid container spacing={1} style={{ display: "flex", justifyContent: "center", alignItems: "center"}} >
+          <Grid container spacing={1} style={{boxShadow: "rgba(0, 0, 0, 0.24) 0px 3px 8px" ,}} >
 
 
             <Grid item xs={12} sm={6} md={3} >
               <Grid item style={{ padding: "10px" }}>
                 <h6 style={{ marginLeft: "10px" }}>1. User</h6>
-                {/* <TextField
+                <TextField
    style={{margin:"5px", width:"100%"}}
    label="User Id"
    onChange={handleChange}
    placeholder="User Id"
    variant="outlined"
-   name="userid"
-   value={userid}
+   name="user_id"
+   value={dataChange.user_id}
    // error={touched && invalid}
    // helperText={touched && error}
    // {...input}
    // {...custom}
-   /> */}
+   />
                 <TextField style={{ margin: "5px", width: "100%" }}
                   label="Username"
                   name="username"
-                  value={username}
+                  value={dataChange.username}
                   placeholder="Username"
                   variant="outlined"
                   onChange={handleChange}
@@ -431,7 +483,7 @@ export default function CustomizedDialogs(props) {
                 <TextField
                   style={{ margin: "5px", width: "100%" }}
                   label="Password"
-                  value={password}
+                  value={dataChange.password}
                   onChange={handleChange}
                   placeholder="Password"
                   variant="outlined"
@@ -445,7 +497,7 @@ export default function CustomizedDialogs(props) {
                   style={{ margin: "5px", width: "100%" }}
                   name="name"
                   label="Name"
-                  value={name}
+                  value={dataChange.name}
                   placeholder="name"
                   variant="outlined"
                   onChange={handleChange}
@@ -458,7 +510,7 @@ export default function CustomizedDialogs(props) {
                   style={{ margin: "5px", width: "100%" }}
                   name="nik"
                   label="Nik"
-                  value={nik}
+                  value={dataChange.nik}
                   onChange={handleChange}
                   placeholder="nik"
                   variant="outlined"
@@ -469,10 +521,10 @@ export default function CustomizedDialogs(props) {
                 />
                 <TextField
                   style={{ margin: "5px", width: "100%" }}
-                  name="periode"
+                  name="periode_usage"
                   label="Periode Usage"
                   type="number"
-                  value={periode}
+                  value={dataChange.periode_usage}
                   onChange={handleChange}
                   placeholder="Periode Usage"
                   variant="outlined"
@@ -490,34 +542,36 @@ export default function CustomizedDialogs(props) {
                 <br></br>
                 <Autocomplete
                   id="depart"
-                  name="depart"
+                  name="dept_id"
 
                   options={dataDepart}
-                  value={dataDepart.find(v => v.dept_id == depart) || {}}
-                  getOptionLabel={(option) => option ? option.dept_name : ''}
-                  onChange={(e, value) => handleChange(convert("depart", value ? value.dept_id : ''))}
+                  value={dataChange.dept_id?dataDepart.find(v => v.dept_id == dataChange.dept_id):''}
+                  getOptionSelected={(option, value) => option.dept_id === dataChange.dept_id}
+                  getOptionLabel={(option) => option.dept_name?option.dept_name :""}
+                  onChange={(e, value) => handleChange(convert("dept_id", value ? value.dept_id : ''))}
                   renderInput={(params) => <TextField name="depart" style={{ margin: "5px", }} {...params} label="Departement" variant="outlined" />}
                 />
 
                 <Autocomplete
 
                   id="group"
-                  name="group"
+                  name="group_id"
                   options={dataGroup}
-                  value={dataGroup.find(v => v.group_id == group) || {}}
-                  getOptionLabel={(option) => option.group_name}
-                  onChange={(e, value) => handleChange(convert("group", value ? value.group_id : ''))}
+                  value={dataChange.group_id?dataGroup.find(v => v.group_id == dataChange.group_id):""}
+                  getOptionSelected={(option, value) => option.group_id === dataChange.group_id}
+                  getOptionLabel={(option) => option.group_name?option.group_name:""}
+                  onChange={(e, value) => handleChange(convert("group_id", value ? value.group_id : ''))}
                   renderInput={(params) => <TextField style={{ margin: "5px" }} {...params} label="Group" variant="outlined" />}
                 />
                 <Autocomplete
 
-                  id="role"
-                  name="role"
+   
 
-                  options={dataRole}
-                  value={dataRole.find(v => v.role_id == role) || {}}
-                  getOptionLabel={(option) => option.role_name}
-                  onChange={(e, value) => handleChange(convert("role", value ? value.role_id : ''))}
+options={dataRole}
+                  value={dataChange.role_id?dataRole.find(v => v.role_id == dataChange.role_id):""}
+                  getOptionSelected={(option, value) => option.role_name === "Admin"}
+                  getOptionLabel={(option) =>option.role_name?option.role_name:""}
+                  onChange={(e, value) => handleChange(convert("role_id", value ? value.role_id : ''))}
                   renderInput={(params) => <TextField style={{ margin: "5px" }} {...params} label="Role" variant="outlined" />}
                 />
                 <TextField
@@ -526,8 +580,8 @@ export default function CustomizedDialogs(props) {
                   type="date"
                   style={{ margin: "5px", width: "100%" }}
                   variant="outlined"
-                  value={expired ? expired : new Date().toDateInputValue()}
-                  name="expired"
+                  value={dataChange.expired_date ? dataChange.expired_date : new Date().toDateInputValue()}
+                  name="expired_date"
 
                   onChange={handleChange}
                   className={classes.textField}
@@ -543,8 +597,8 @@ export default function CustomizedDialogs(props) {
                   label="Date Status"
                   type="date"
 
-                  value={status ? status : new Date().toDateInputValue()}
-                  name="status"
+                  value={dataChange.status_date ? dataChange.status_date : new Date().toDateInputValue()}
+                  name="status_date"
 
                   onChange={handleChange}
                   className={classes.textField}
@@ -559,25 +613,27 @@ export default function CustomizedDialogs(props) {
               </Grid>
 
             </Grid>
-            <Grid item xs={12} sm={6} md={4} style={{alignSelf:"flex-start"}} >
+            <Grid item xs={12} sm={6} md={4} style={{alignSelf:"flex-start", padding:"8px"}} >
+              
               <h6 style={{ marginLeft: "10px" }}>2. Branch</h6>
               <Autocomplete
 
                 id="role"
-                name="role"
+                name="role_id"
 
                 options={dataBranch}
 
-                getOptionLabel={(option) => option.branch_name}
-                onChange={(e, value) => handleChange(convert("branch", value ? value.branch_id : ''))}
+                getOptionLabel={(option) => option.branch_name?option.branch_name:""}
+                getOptionSelected={(option, value) => option.branch_id === dataChange.branch_id}
+                onChange={(e, value) => handleChange(convert("branch_id", value ? value.branch_id : ''))}
                 renderInput={(params) => <TextField style={{ margin: "10px" }} {...params} label="Branch" variant="outlined" />}
-                value={dataBranch.find(v => v.branch_id == branch) || {}}
+                value={dataChange.branch_id?dataBranch.find(v => v.branch_id == dataChange.branch_id):""}
               />
             </Grid>
           </Grid>
         </DialogContent>
-        <DialogActions style={{boxShadow: "rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px"}}>
-          <Button style={{boxShadow: "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px"}} autoFocus onClick={handleSubmitUser} >
+        <DialogActions style={{}}>
+          <Button className={classes.popup} autoFocus onClick={handleSubmitUser} >
             Save
           </Button>
         </DialogActions>

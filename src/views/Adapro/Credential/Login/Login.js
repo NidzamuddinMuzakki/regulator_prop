@@ -5,6 +5,7 @@ import authMethod from "auth/authMethod";
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import { motion, useCycle } from "framer-motion";
+import {Paper, TextField, Button as Beton} from "@material-ui/core";
 
 const ballStyle = {
   display: "block",
@@ -88,6 +89,15 @@ class Login extends Component {
         //  () => { console.log(this.state); }
     )
   }
+  handleApi(e){
+
+  }
+  handlesave(e){
+
+  }
+  handlereset(e){
+
+  }
   _handleFormSubmit = (e) => {
     e.preventDefault();
     this.setState({
@@ -141,7 +151,6 @@ class Login extends Component {
     return (
       <div className="app flex-row align-items-center">
         <Container>
-          
           <Row className="justify-content-center">
             
             <Col md="8">
@@ -189,8 +198,11 @@ class Login extends Component {
               <CardGroup>
                 <Card className="p-4">
                   <CardBody>
+                  
+                      
                     <Form>
                       <h1>Login</h1>
+                    
                       <p className="text-muted">Sign In to your account</p>
                       <InputGroup className="mb-3">
                         <InputGroupAddon addonType="prepend">
@@ -244,6 +256,7 @@ class Login extends Component {
           {this.state.error.toString()}
         </Alert>
       </Snackbar>
+      
       {/* <Alert severity="error">This is an error message!</Alert>
       <Alert severity="warning">This is a warning message!</Alert>
       <Alert severity="info">This is an information message!</Alert>
@@ -251,6 +264,7 @@ class Login extends Component {
         </Container>
 
       </div>
+      
     );
   }
 }

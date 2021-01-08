@@ -22,24 +22,6 @@ import decode from 'jwt-decode';
 import { cosh } from 'core-js/fn/number';
 import { data } from 'jquery';
 import Dialog from './../../../../components/popup';
-const getUserDept = (name, id,i) => {  //on startup function
-  let token = localStorage.getItem('id_token');
- 
-  API.post("/credential_service/get_department",{
-    key: token,
-    dept_id: id,
-    info_data:'all'
-  }
-  
-  ).then(data => {
-    let u = data.data.data[0].dept_name;
-    name[i] = u;
-    // this.setState({
-    //   dataSet: data.data.data
-    // });
-  
-  })
-}
 const isOpen1 = (payload) => ({
   type: "OPEN",
   payload,
@@ -76,6 +58,8 @@ class UserView extends Component {
       dataSelected :this.props.jumlah,
       modalAction : '',
       dept:[],
+      role:[],
+      group:[],
       isvalid : true,
       irnumber: 0,
       editStart: false,
@@ -227,6 +211,7 @@ class UserView extends Component {
           
         });
       },
+      
       afterOnCellMouseOver: (event, coords) => {
         if(this.cols[0].readOnly === false) {
           if(this.hotTableComponent.current.hotInstance.getCellMeta(coords.row,coords.col).prop==='roleid') {
@@ -612,7 +597,70 @@ class UserView extends Component {
   //       }
   //   )
   // }
-  
+  getUserDept = (id,i) => {  //on startup function
+    let token = localStorage.getItem('id_token');
+   
+    API.post("/credential_service/get_department",{
+      key: token,
+      dept_id: id,
+      info_data:'detail'
+    }
+    
+    ).then(data => {
+      
+      let u = data.data.data.dept_name;
+      this.setState(prevState => ({
+        dept: [...prevState.dept, u]
+      }))
+      // this.setState({
+      //   dataSet: data.data.data
+      // });
+    
+    })
+  }
+  getUserGroup = (id,i) => {  //on startup function
+    let token = localStorage.getItem('id_token');
+   
+    API.post("/credential_service/get_group",{
+      key: token,
+      group_id: id,
+      info_data:'detail'
+    }
+    
+    ).then(data => {
+      
+      let u = data.data.data.group_name;
+      this.setState(prevState => ({
+        group: [...prevState.group, u]
+      }))
+      // this.setState({
+      //   dataSet: data.data.data
+      // });
+    
+    })
+  }
+  getUserRole = (id,i) => {  //on startup function
+    let token = localStorage.getItem('id_token');
+   
+    API.post("/credential_service/get_role",{
+      key: token,
+      role_id: id,
+      info_role:'detail'
+    }
+    
+    ).then(data => {
+      
+      let u = data.data.data.role_name;
+      console.log(data.data.data)
+      this.setState(prevState => ({
+        role: [...prevState.role, u]
+      }))
+      // this.setState({
+      //   dataSet: data.data.data
+      // });
+    
+    })
+  }
   getUserData = () => {  //on startup function
     let token = localStorage.getItem('id_token');
    
@@ -622,12 +670,14 @@ class UserView extends Component {
     }
     
     ).then(data => {
-      console.log(data.data.data)
+     
       this.setState({
         dataSet: data.data.data
       });
       for(let i=0;i<data.data.data.length;i++){
-        getUserDept(this.state.dept, data.data.data[0].dept_id,i);
+        this.getUserDept(data.data.data[0].dept_id,i);
+        this.getUserRole(data.data.data[0].role_id,i);
+        this.getUserGroup(data.data.data[0].group_id,i);
   
       }
     })
@@ -640,7 +690,7 @@ class UserView extends Component {
       key: token,
       userId: '1'
     }).then(data => {
-      console.log(data.data.data);
+      // console.log(data.data.data);
       
     
       // this.cols[1].source = data.data.data[0].role_id
@@ -860,6 +910,7 @@ class UserView extends Component {
     
    }
   componentDidUpdate(prevProps, prevState, ss){
+    console.log(this.state.dept[0])
     if(prevState.isOpen!==this.props.terbuka.isOpen){
       this.getUserData();
       this.setState({
@@ -868,7 +919,8 @@ class UserView extends Component {
   
 
     }else{
-      console.log("cuy")
+     
+      // console.log("cuy")
     }
     // console.log(this.props.jumlah)
   }
@@ -1173,7 +1225,7 @@ class UserView extends Component {
               </Card>
             </ModalBody>
           </Modal>
-        <Table data={this.state.dataSet} name="user" deptName={[...this.state.dept]}/>
+        <Table data={this.state.dataSet} name="user" deptName={[...this.state.dept]}  roleName={[...this.state.role]} groupName={[...this.state.group]}/>
         <Dialog open={this.state.isOpen} actionForm={this.state.actionForm}></Dialog>
           {/* <HotTable ref={this.hotTableComponent} id="hot2" settings={this.hotSettings} licenseKey="non-commercial-and-evaluation" /> */}
         </div>

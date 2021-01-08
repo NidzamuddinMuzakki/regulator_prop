@@ -11,6 +11,7 @@ import {createStore, combineReducers} from 'redux';
 import userSettingSelected from './reducers/userSettingReducer';
 import popup from './reducers/popup';
 
+
 const rootReducer =createStore(combineReducers({
     userSettingSelected, popup
     
