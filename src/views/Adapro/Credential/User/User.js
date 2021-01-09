@@ -651,7 +651,7 @@ class UserView extends Component {
     ).then(data => {
       
       let u = data.data.data.role_name;
-      console.log(data.data.data)
+      // console.log(data.data.data)
       this.setState(prevState => ({
         role: [...prevState.role, u]
       }))
@@ -910,7 +910,7 @@ class UserView extends Component {
     
    }
   componentDidUpdate(prevProps, prevState, ss){
-    console.log(this.state.dept[0])
+    // console.log(this.state.dept[0])
     if(prevState.isOpen!==this.props.terbuka.isOpen){
       this.getUserData();
       this.setState({

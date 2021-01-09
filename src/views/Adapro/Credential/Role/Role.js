@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import { Row, Col } from 'reactstrap'
 import { rgbToHex } from '@coreui/coreui/dist/js/coreui-utilities'
-import Table from "./../../../../components/Table";
+import Table from "../../../../components/Table";
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import API from 'api';

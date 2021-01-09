@@ -19,15 +19,15 @@ export default {
         },
         {
           name: 'Department',
-          url: '/usersetting/departement',
+          url: '/usersetting/depart',
         },
         {
           name: 'Group',
           url: '/usersetting/group',
         },
         {
-          name: 'Reporting Branch',
-          url: '/usersetting/reportbranch',
+          name: 'Branch',
+          url: '/usersetting/branch',
         },
       ]
     },
