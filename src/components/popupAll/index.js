@@ -266,6 +266,8 @@ const getGroupDetail = (id) => {  //on startup function
     }
   })
   const handleSubmitUser = (e) => {
+
+   
     let token = localStorage.getItem('id_token');
     // console.log(role);
     // dispatch(kirimuserselected(0, []))

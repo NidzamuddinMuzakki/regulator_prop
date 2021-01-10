@@ -272,7 +272,11 @@ export default function EnhancedTable(props) {
   };
 
   const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
+    if(selected.length>0){
+      dispatch(kirimuserselected(0,[]))
+      setSelected([]);
+    }
+    else if (event.target.checked) {
       const newSelecteds = rows.map((n) => n.id);
       let jumlah = newSelecteds.length;
       

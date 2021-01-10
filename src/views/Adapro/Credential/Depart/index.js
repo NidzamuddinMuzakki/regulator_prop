@@ -25,6 +25,18 @@ const Depart = React.memo(() =>{
           }
         }
       }
+    const kirimSelected = (jumlah, data) => {
+        return {
+          type: "SELECTEDUSER",
+          payload: {
+            selectedUser: jumlah,
+            selectedId:data
+          }
+        }
+      }  
+      useEffect(()=>{
+        dispatch(kirimSelected(0,[]))
+      }, [])
       const getGroupDetail = (id) => {  //on startup function
         let token = localStorage.getItem('id_token');
     

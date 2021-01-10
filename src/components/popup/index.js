@@ -104,15 +104,15 @@ export default function CustomizedDialogs(props) {
     username:"",
     password:"",
     name:"",
-    user_id:0,
-    group_id:0,
+    user_id:"",
+    group_id:"",
     nik:"",
-    dept_id:0,
-    role_id:0,
+    dept_id:"",
+    role_id:"",
     periode_usage:"",
-    branch_id:0,
-    expired_date:"",
-    status_date:""
+    branch_id:"",
+    expired_date:new Date().toDateInputValue(),
+    status_date:new Date().toDateInputValue()
   })
 
 
@@ -271,6 +271,7 @@ export default function CustomizedDialogs(props) {
   })
   const handleSubmitUser = (e) => {
     let token = localStorage.getItem('id_token');
+    console.log(dataChange);
     // console.log(role);
     dispatch(kirimuserselected(0, []))
     if (actionForm == "EDIT USER") {
@@ -322,10 +323,11 @@ export default function CustomizedDialogs(props) {
         periode_usage: dataChange.periode_usage,
         expired_date: dataChange.expired_date,
         status_date: dataChange.status_date,
-
+      
       }).then(data => {
 
         // console.log(data.data)
+        console.log(dataChange.expired_date)
         alert("berhasil menambah")
         setOpen(false);
         dispatch(kirimisOpen(false))
@@ -392,20 +394,21 @@ export default function CustomizedDialogs(props) {
       username:"",
     password:"",
     name:"",
-    user_id:0,
-    group_id:0,
+    user_id:"",
+    group_id:"",
     nik:"",
-    dept_id:0,
-    role_id:0,
+    dept_id:"",
+    role_id:"",
     periode_usage:"",
-    branch_id:0,
-    expired_date:"",
-    status_date:""
+    branch_id:"",
+    expired_date:new Date().toDateInputValue(),
+    status_date:new Date().toDateInputValue()
     })
   }
   const handleClose = () => {
     setOpen(false);
     dispatch(kirimisOpen(false))
+    dispatch(kirimuserselected(0,[]))
     resetForm();
 
   };

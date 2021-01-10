@@ -29,7 +29,9 @@ const isOpen1 = (payload) => ({
 })
 const mapDispatchToProps = dispatch =>{
   return {
-    membuka:()=>dispatch({type:"OPEN", payload:{isOpen:true}})
+    membuka:()=>dispatch({type:"OPEN", payload:{isOpen:true}}),
+    kirimSelected:()=>dispatch({type:"SELECTEDUSER", payload:{ selectedUser: 0,
+      selectedId: []}})
   }
 }
 const userSelected1 = state => ({
@@ -898,6 +900,7 @@ class UserView extends Component {
   //   this.getUserData()
   // }
   componentWillMount() {
+    this.props.kirimSelected();
     Promise.all([
       // // Promise.resolve(this.getUserColWidth()),
       // Promise.resolve(this.getOptionData()),
@@ -913,6 +916,7 @@ class UserView extends Component {
     // console.log(this.state.dept[0])
     if(prevState.isOpen!==this.props.terbuka.isOpen){
       this.getUserData();
+      this.props.kirimSelected();
       this.setState({
         isOpen :this.props.terbuka.isOpen
       })

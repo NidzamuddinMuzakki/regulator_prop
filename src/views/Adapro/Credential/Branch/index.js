@@ -24,7 +24,18 @@ const Branch = React.memo(() =>{
           }
         }
       }
-     
+      const kirimSelected = (jumlah, data) => {
+        return {
+          type: "SELECTEDUSER",
+          payload: {
+            selectedUser: jumlah,
+            selectedId:data
+          }
+        }
+      }  
+      useEffect(()=>{
+        dispatch(kirimSelected(0,[]))
+      }, [])
 
     const rowAdd =  ()=>{
         dispatch(kirimisOpenDepart(true))

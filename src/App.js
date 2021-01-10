@@ -40,9 +40,10 @@ const TestMapping = Loadable({
 });
 
 
-class App extends Component {
+const App = ()=>{
 
-  render() {
+  
+  
     return (
       <HashRouter>
           <Switch>
@@ -55,7 +56,7 @@ class App extends Component {
           </Switch>
       </HashRouter>
     );
-  }
+  
 }
 
 export default App;
