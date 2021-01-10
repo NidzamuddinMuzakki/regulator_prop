@@ -339,7 +339,7 @@ export default function CustomizedDialogs(props) {
       })
     }
   }
-  const handleChange = (e) => {
+  const handleChange = React.useCallback((e) => {
 
       setDataChange({
         ...dataChange,
@@ -385,7 +385,7 @@ export default function CustomizedDialogs(props) {
 
 
 
-  }
+  },[dataChange])
   const handleClickOpen = () => {
     setOpen(true);
   };

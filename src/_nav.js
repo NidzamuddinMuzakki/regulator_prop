@@ -18,6 +18,10 @@ export default {
           url: '/usersetting/user',
         },
         {
+          name: 'Role',
+          url: '/usersetting/role',
+        },
+        {
           name: 'Department',
           url: '/usersetting/depart',
         },

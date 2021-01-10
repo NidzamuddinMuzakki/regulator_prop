@@ -18,7 +18,7 @@ const routes = [
   { path: '/usersetting/depart', name: 'User Setting / Depart', component: CredDepart },
   { path: '/usersetting/group', name: 'User Setting / Group', component: CredGroup },
   { path: '/usersetting/branch', name: 'User Setting / Branch', component: CredBranch },
-  { path: '/credential/role', name: 'Role Setting', component: CredRole },
+  { path: '/usersetting/role', name: 'Role Setting / Role', component: CredRole },
   { path: '/kerno', name: 'Kerno', component: Kerno },
  
 ];

@@ -130,7 +130,7 @@ export default function CustomizedDialogs(props) {
   
   const selected = useSelector(state => state.userSettingSelected);
   
-  const getDepartDetail = (id) => {  //on startup function
+  const getDepartDetail = React.useCallback((id) => {  //on startup function
     let token = localStorage.getItem('id_token');
 
     API.post("/credential_service/get_department", {
@@ -147,8 +147,8 @@ export default function CustomizedDialogs(props) {
         }) 
     })
     
-    }   
-    const getBranchDetail = (id) => {  //on startup function
+    },[setDataChange]  ) 
+    const getBranchDetail = React.useCallback((id) => {  //on startup function
         let token = localStorage.getItem('id_token');
     
         API.post("/credential_service/get_branch", {
@@ -165,9 +165,9 @@ export default function CustomizedDialogs(props) {
             }) 
         })
         
-    }
+    },[setDataChange])
 
-const getGroupDetail = (id) => {  //on startup function
+const getGroupDetail = React.useCallback((id) => {  //on startup function
     let token = localStorage.getItem('id_token');
 
     API.post("/credential_service/get_group", {
@@ -183,8 +183,24 @@ const getGroupDetail = (id) => {  //on startup function
         }) 
     })
     
-}
+},[setDataChange])
+const getRoleDetail = React.useCallback((id) => {  //on startup function
+  let token = localStorage.getItem('id_token');
 
+  API.post("/credential_service/get_role", {
+    key: token,
+    role_id: id,
+    info_role: "detail"
+  }).then(data => {
+    let uaja = data.data.data;
+    
+    setDataChange({
+          role_name:data.data.data.role_name,
+          role_id:data.data.data.role_id
+      }) 
+  })
+  
+},[setDataChange])
 
 
 
@@ -207,7 +223,7 @@ const getGroupDetail = (id) => {  //on startup function
       // });
 
 
-  const getGroup = () => {  //on startup function
+const getGroup = React.useCallback(() => {  //on startup function
     let token = localStorage.getItem('id_token');
 
     API.post("/credential_service/get_group", {
@@ -217,7 +233,7 @@ const getGroupDetail = (id) => {  //on startup function
       let uaja = data.data.data;
       setDataGroup(data.data.data)
     })
-}
+},[setDataGroup])
   const kirimuserselected = (jumlah, data) => {
     return {
       type: "SELECTEDUSER",
@@ -241,15 +257,7 @@ const getGroupDetail = (id) => {  //on startup function
 
 
 
-  
-  function getSelectedItem(databesar, datakecil) {
-    const item = databesar.find((opt) => {
-      if (opt.value == datakecil)
-        return opt;
-    })
-    return item || {};
-  }
- 
+
   
   const dispatch = useDispatch();
   const kirimisOpen = (isOpen, type) => {
@@ -411,7 +419,7 @@ const getGroupDetail = (id) => {  //on startup function
       }
 
   }
-  const handleChange = (e) => {
+  const handleChange = React.useCallback((e) => {
 
       setDataChange({
         ...dataChange,
@@ -456,12 +464,12 @@ const getGroupDetail = (id) => {  //on startup function
     // }
 
 
-
-  }
+ 
+  }, [dataChange])
   const handleClickOpen = () => {
     setOpen(true);
   };
-  const resetForm = () => {
+  const resetForm = React.useCallback(() => {
     setDataChange({
      
         dept_name:'',
@@ -475,7 +483,8 @@ const getGroupDetail = (id) => {  //on startup function
    
     })
     dispatch(kirimuserselected(0,[]))
-  }
+  },[setDataChange]);
+ 
   const Form  = React.memo((props)=>{
       return (
           <div>
@@ -484,7 +493,7 @@ const getGroupDetail = (id) => {  //on startup function
           </div>
       )
   })
-  const handleClose = () => {
+  const handleClose = React.useCallback(() => {
     
     if(props.actionForm=="Add Department"||props.actionForm=="Edit Department"){
         dispatch(kirimisOpen(false,"CLOSEDEPART"))
@@ -498,11 +507,15 @@ const getGroupDetail = (id) => {  //on startup function
         dispatch(kirimisOpen(false,"CLOSEBRANCH"))
         
     }
+    else if(props.actionForm=="Add Role" || props.actionForm=="Edit Role"){
+      dispatch(kirimisOpen(false,"CLOSEROLE"))
+      
+  }
     dispatch(kirimuserselected(0,[]))
     setOpen(false);
     resetForm();
 
-  };
+  },[open]);
 
   useEffect(() => {
     setOpen(props.open)
@@ -551,6 +564,21 @@ const getGroupDetail = (id) => {  //on startup function
       if(selected.selectedUser==1){
           getBranchDetail(selected.selectedId[0]);
       }
+}
+}
+else if(actionForm=="Edit Role" || actionForm=="Add Role"){
+  if (actionForm == "Add Role") {
+  
+      resetForm();
+      // console.log(open)
+  //   let id = selectedusersetting.selectedId[0];
+  //   getUserDetail(id);
+  } else if(actionForm == "Edit Role") {
+      resetForm();
+  
+    if(selected.selectedUser==1){
+        getRoleDetail(selected.selectedId[0]);
+    }
 }
 
 }
@@ -615,8 +643,8 @@ const getGroupDetail = (id) => {  //on startup function
                 
                   options={dataGroup}
                   value={dataChange.group_id?dataGroup.find(v => v.group_id == dataChange.group_id):''}
-                  getOptionSelected={(option, value) => option.group_id === dataChange.group_id}
-                  getOptionLabel={(option) => option.group_name?option.group_name :""}
+                  // getOptionSelected ={(option, value) => option === value?option:''}
+                  getOptionLabel={(option) => option.group_name?option.group_name:""}
                   onChange={(e, value) => handleChange(convert("group_id", value ? value.group_id : ''))}
                   renderInput={(params) => <TextField name="depart" style={{ marginTop: "10px", }} {...params} label="Group" variant="outlined" />}
                 />
@@ -669,7 +697,32 @@ const getGroupDetail = (id) => {  //on startup function
            variant="outlined"
            name={"branch_name"}
            value={dataChange.branch_name} ></TextField>
-       </div> :''}
+       </div> :actionForm=="Edit Role"||actionForm=="Add Role"?
+         <div>
+         <TextField
+       style={{ width:"100%"}}
+       label={"Role ID"}
+       onChange={handleChange}
+       variant="outlined"
+       name={"role_id"}
+       type="number"
+       value={dataChange.role_id}
+       
+       // error={touched && invalid}
+       // helperText={touched && error}
+       // {...input}
+       // {...custom}
+       />                             
+        <TextField
+       style={{ width:"100%", marginTop:"10px"}}
+       label={"Role Name"} 
+       onChange={handleChange}
+       variant="outlined"
+       name={"role_name"}
+       value={dataChange.role_name} ></TextField>
+   </div> 
+       
+       :''}
               </Grid>
 
             

@@ -48,6 +48,28 @@ function popupGroup(state = initialState, action){
             return state;
     }
 }
+function popupRole(state = initialState, action){
+
+    switch(action.type){
+        case "OPENROLE":
+            const stateuser = {...state}
+            if(action.payload){
+                stateuser.isOpen = action.payload.isOpen;
+               
+            }
+            return {...stateuser}
+        case "CLOSEROLE":     
+            const stateuser1 = {...state}
+            if(action.payload){
+                stateuser1.isOpen = action.payload.isOpen;
+               
+            }
+            return {...stateuser1}
+      
+        default:
+            return state;
+    }
+}
 function popupBranch(state = initialState, action){
 
     switch(action.type){
@@ -73,5 +95,6 @@ function popupBranch(state = initialState, action){
 export {
     popupDepart,
     popupGroup,
-    popupBranch
+    popupBranch,
+    popupRole
   };

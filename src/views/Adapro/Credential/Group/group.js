@@ -37,12 +37,12 @@ const Depart = React.memo(() =>{
       useEffect(()=>{
         dispatch(kirimSelected(0,[]))
       }, [])
-    const rowAdd =  ()=>{
+    const rowAdd =  React.useCallback(()=>{
         dispatch(kirimisOpenDepart(true))
         setOpen(true);
         setActionForm("Add Group")
-    }
-    const rowEdit =  ()=>{
+    },[dataSelected])
+    const rowEdit = React.useCallback(()=>{
         if(dataSelected.selectedUser==0){
             alert("no item selected")
         }else{
@@ -51,8 +51,8 @@ const Depart = React.memo(() =>{
             setActionForm("Edit Group")
 
         }
-    }
-    const rowDelete =  ()=>{
+    },[dataSelected])
+    const rowDelete = React.useCallback(()=>{
         if(dataSelected.selectedUser==0){
             alert("no item selected")
         }else{
@@ -72,8 +72,8 @@ const Depart = React.memo(() =>{
             }
         }
 
-    }
-    const getGroupAll = ()=>{
+    },[dataSelected])
+    const getGroupAll = React.useCallback(()=>{
         API.post("/credential_service/get_group",{
             key: token,
             info_data:'all'
@@ -86,7 +86,7 @@ const Depart = React.memo(() =>{
             
           
         })
-    }
+    },[setDataGroupAll])
     useEffect(()=>{
         getGroupAll();
         setOpen(popupDepart)

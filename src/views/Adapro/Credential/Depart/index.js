@@ -36,8 +36,9 @@ const Depart = React.memo(() =>{
       }  
       useEffect(()=>{
         dispatch(kirimSelected(0,[]))
+      
       }, [])
-      const getGroupDetail = (id) => {  //on startup function
+      const getGroupDetail = React.useCallback((id) => {  //on startup function
         let token = localStorage.getItem('id_token');
     
         API.post("/credential_service/get_group", {
@@ -50,13 +51,13 @@ const Depart = React.memo(() =>{
           setGroupName( arr => [...arr, uaja.group_name]);
         })
         
-    }
+    },[setGroupName])
 
-    const rowAdd =  ()=>{
+    const rowAdd =  React.useCallback(()=>{
         dispatch(kirimisOpenDepart(true))
         setOpen(true);
         setActionForm("Add Department")
-    }
+    }, [dataSelected])
     const rowEdit =  ()=>{
         if(dataSelected.selectedUser==0){
             alert("no item selected")

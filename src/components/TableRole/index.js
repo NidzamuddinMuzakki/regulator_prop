@@ -66,13 +66,11 @@ function EnhancedTableHead(props) {
   // console.log("hay"+props.data)
   const headCells = [
     { id: 'no', numeric: true, disablePadding: true, label: 'No' },
-    { id: 'username', numeric: false, disablePadding: false, label: 'Username' },
-    { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
-    { id: 'password', numeric: false, disablePadding: false, label: 'Password' },
-    { id: 'role', numeric: false, disablePadding: false, label: 'Role' },
-    { id: 'nik', numeric: false, disablePadding: false, label: 'Nik' },
-    { id: 'dept', numeric: false, disablePadding: false, label: 'Departement' },
-    { id: 'group', numeric: false, disablePadding: false, label: 'Group' },
+    { id: 'Role_id', numeric: false, disablePadding: false, label: 'Role ID' },
+    { id: 'Role_name', numeric: false, disablePadding: false, label: 'Role Name' },
+    { id: 'create_time', numeric: false, disablePadding: false, label: 'Create Time' },
+    { id: 'update_time', numeric: false, disablePadding: false, label: 'Update Time' },
+ 
 
 
   ];
@@ -233,15 +231,15 @@ export default function EnhancedTable(props) {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   let deptName = [];
   
-  function createData(id,no,username, name, password,role,nik, dept, group) {
-    return { id,no,username, name, password,role, nik, dept, group };
+  function createData(id,no,roleName, crtDate, updDate) {
+    return { id,no,roleName,crtDate, updDate };
   }
   const rows = [];
   
   let dataUser = props.data;
 // console.log(props.deptName[0])
   for(let i=0;i<dataUser.length;i++){
-    rows[i] = createData(dataUser[i].user_id,(i+1),dataUser[i].username, dataUser[i].name, dataUser[i].password,props.roleName[i], dataUser[i].nik,props.deptName[i], props.groupName[i]);
+    rows[i] = createData(dataUser[i].role_id,(i+1),dataUser[i].role_name, dataUser[i].created_time, dataUser[i].updated_time);
     
   }
 
@@ -434,17 +432,13 @@ export default function EnhancedTable(props) {
                         {row.no}
                       </TableCell>
                       <TableCell  >
-                        {row.username}
+                        {row.id}
                       </TableCell>
-                      <TableCell  >{row.name}</TableCell>
+                      <TableCell  >{row.roleName}</TableCell>
+                      <TableCell  >{row.crtDate}</TableCell>
+                      <TableCell  >{row.updDate}</TableCell>
                       
-                      <TableCell >{row.password}</TableCell>
-                      <TableCell  >{row.role}</TableCell>
-                      <TableCell >{row.nik}</TableCell>
                       
-                      <TableCell  >{row.dept}</TableCell>
-                   
-                      <TableCell >{row.group}</TableCell>
                       
                     </TableRow>
                   );

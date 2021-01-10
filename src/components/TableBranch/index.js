@@ -23,9 +23,9 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import set from 'core-js/es6/set';
 import {useSelector,useDispatch} from 'react-redux';
 import Tabs from  '../tabkomponen/tabs.js';
-
-
-
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 
 
 function descendingComparator(a, b, orderBy) {
@@ -79,7 +79,12 @@ function EnhancedTableHead(props) {
       <TableRow>
         <TableCell padding="checkbox">
           <Checkbox
+        
             indeterminate={numSelected > 0 && numSelected < rowCount}
+            color = "primary"
+            indeterminateIcon={<RemoveCircleIcon/>}
+            icon={<RadioButtonUncheckedIcon></RadioButtonUncheckedIcon>}
+            checkedIcon={<CheckCircleIcon></CheckCircleIcon>}
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
             inputProps={{ 'aria-label': 'select all desserts' }}
@@ -121,12 +126,12 @@ const useToolbarStyles = makeStyles((theme) => ({
   highlight:
     theme.palette.type === 'light'
       ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85),
+          color: "#0078d4",
+          backgroundColor: "#c7e0f4",
         }
       : {
           color: theme.palette.text.primary,
-          backgroundColor: theme.palette.secondary.dark,
+          backgroundColor: "green",
         },
   title: {
     flex: '1 1 100%',
@@ -182,9 +187,30 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     marginBottom: theme.spacing(2),
   },
-  table: {
-    minWidth: 750,
+  // table: {
+  //   minWidth: 750,
+  //   '& tbody tr:hover > td':{
+  //       backgroundColor:"#c7e0f4"
+  //   },
+  //   '& tbody tr:focus > td':{
+  //     backgroundColor:"#c7e0f4"
+  // },
+  tableRow: {
+    
+    "&$selected,&$hover:hover": {
+      backgroundColor: "#c7e0f4"
+    },
+    
   },
+  // tableCell: {
+  //   "$hover:hover &": {
+  //     color: "pink"
+  //   }
+  
+  hover: {},
+  selected: {},
+    
+
   visuallyHidden: {
     border: 0,
     clip: 'rect(0 0 0 0)',
@@ -270,7 +296,11 @@ export default function EnhancedTable(props) {
   };
 
   const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
+    if(selected.length>0){
+      dispatch(kirimuserselected(0,[]))
+      setSelected([]);
+    }
+    else if (event.target.checked) {
       const newSelecteds = rows.map((n) => n.id);
       let jumlah = newSelecteds.length;
       
@@ -366,6 +396,7 @@ export default function EnhancedTable(props) {
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
+              
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
@@ -383,23 +414,32 @@ export default function EnhancedTable(props) {
                     <TableRow
                       id="rowcheck"
                       hover
+                  
                       style={{cursor:"pointer"}}
                       onMouseEnter={selected.length==0?handleEnter:null}
                       onMouseLeave={selected.length==0?handleLeave:null}
                       onClick={(event) => handleClick(event, row.id)}
                       role="checkbox"
+                      className={classes.tableRow}
+                      classes={{ hover: classes.hover, selected:classes.selected }}
                       aria-checked={isItemSelected}
                       tabIndex={1}
                       key={row.id}
+                   
                       selected={isItemSelected}
                     >
-                      <TableCell  padding="checkbox">
+                      <TableCell   className={classes.tableCell} padding="checkbox">
                         <Checkbox style={{display:hiding}}
+                          icon={<RadioButtonUncheckedIcon></RadioButtonUncheckedIcon>}
+                          checkedIcon={<CheckCircleIcon></CheckCircleIcon>}
+                          color = "primary"
                           checked={isItemSelected}
+                          
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      <TableCell >
+                      <TableCell    component="th"
+                scope="row" className={classes.tableCell} >
                         {row.no}
                       </TableCell>
                       <TableCell  >
@@ -414,11 +454,7 @@ export default function EnhancedTable(props) {
                     </TableRow>
                   );
                 })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
+              
             </TableBody>
           </Table>
         </TableContainer>

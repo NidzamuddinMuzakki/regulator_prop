@@ -23,7 +23,9 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import set from 'core-js/es6/set';
 import {useSelector,useDispatch} from 'react-redux';
 import Tabs from  '../tabkomponen/tabs.js';
-
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 
 
 
@@ -79,6 +81,10 @@ function EnhancedTableHead(props) {
       <TableRow>
         <TableCell padding="checkbox">
           <Checkbox
+           color = "primary"
+           indeterminateIcon={<RemoveCircleIcon/>}
+           icon={<RadioButtonUncheckedIcon></RadioButtonUncheckedIcon>}
+           checkedIcon={<CheckCircleIcon></CheckCircleIcon>}
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
@@ -121,8 +127,8 @@ const useToolbarStyles = makeStyles((theme) => ({
   highlight:
     theme.palette.type === 'light'
       ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85),
+        color: "#0078d4",
+        backgroundColor: "#c7e0f4",
         }
       : {
           color: theme.palette.text.primary,
@@ -185,6 +191,20 @@ const useStyles = makeStyles((theme) => ({
   table: {
     minWidth: 750,
   },
+  tableRow: {
+    
+    "&$selected,&$hover:hover": {
+      backgroundColor: "#c7e0f4"
+    },
+    
+  },
+  // tableCell: {
+  //   "$hover:hover &": {
+  //     color: "pink"
+  //   }
+  
+  hover: {},
+  selected: {},
   visuallyHidden: {
     border: 0,
     clip: 'rect(0 0 0 0)',
@@ -270,7 +290,11 @@ export default function EnhancedTable(props) {
   };
 
   const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
+    if(selected.length>0){
+      dispatch(kirimuserselected(0,[]))
+      setSelected([]);
+    }
+    else if (event.target.checked) {
       const newSelecteds = rows.map((n) => n.id);
       let jumlah = newSelecteds.length;
       
@@ -383,6 +407,8 @@ export default function EnhancedTable(props) {
                     <TableRow
                       id="rowcheck"
                       hover
+                      className={classes.tableRow}
+                      classes={{ hover: classes.hover, selected:classes.selected }}
                       style={{cursor:"pointer"}}
                       onMouseEnter={selected.length==0?handleEnter:null}
                       onMouseLeave={selected.length==0?handleLeave:null}
@@ -396,6 +422,9 @@ export default function EnhancedTable(props) {
                       <TableCell  padding="checkbox">
                         <Checkbox style={{display:hiding}}
                           checked={isItemSelected}
+                          icon={<RadioButtonUncheckedIcon></RadioButtonUncheckedIcon>}
+                          checkedIcon={<CheckCircleIcon></CheckCircleIcon>}
+                          color = "primary"
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
