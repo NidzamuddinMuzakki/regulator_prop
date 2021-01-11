@@ -227,12 +227,14 @@ export default function EnhancedTable(props) {
   const [hiding, setHiding] = React.useState("none");
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
-  const [selected, setSelected] = React.useState([]);
+  const [selected, setSelected] = React.useState(selectedusersetting.selectedId);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   let deptName = [];
-  
+  useEffect(()=>{
+    setSelected(selectedusersetting.selectedId);
+},[selectedusersetting.selectedId])
   function createData(id,no,username, name, password,role,nik, dept, group) {
     return { id,no,username, name, password,role, nik, dept, group };
   }
@@ -240,8 +242,10 @@ export default function EnhancedTable(props) {
   
   let dataUser = props.data;
 // console.log(props.deptName[0])
+let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
   for(let i=0;i<dataUser.length;i++){
-    rows[i] = createData(dataUser[i].user_id,(i+1),dataUser[i].username, dataUser[i].name, dataUser[i].password,props.roleName[i], dataUser[i].nik,props.deptName[i], props.groupName[i]);
+    nomorTogel++;
+    rows[i] = createData(dataUser[i].user_id,(nomorTogel),dataUser[i].username, dataUser[i].name, dataUser[i].password,props.roleName[i], dataUser[i].nik,props.deptName[i], props.groupName[i]);
     
   }
 
@@ -272,6 +276,15 @@ export default function EnhancedTable(props) {
     }
     else{
       e.target.parentNode.children[0].children[0].style.display="none";
+    }
+  }
+  const kirimurowperpage = (jumlah, halaman)=>{
+    return{
+      type:"CHANGEROWUSER",
+      payload:{
+        jumlah: jumlah,
+        halaman:halaman
+      }
     }
   }
   let handleEnter = (e)=>{
@@ -320,9 +333,7 @@ export default function EnhancedTable(props) {
     }
    
   },[selected])
-  useEffect(()=>{
-    setSelected([]);
-  }, [props.data])
+ 
   const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
     
@@ -350,10 +361,12 @@ export default function EnhancedTable(props) {
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
+    dispatch(kirimurowperpage(rowsPerPage, newPage+1))
   };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
+    dispatch(kirimurowperpage(event.target.value, 1))
     setPage(0);
   };
 
@@ -398,9 +411,8 @@ export default function EnhancedTable(props) {
               
             />
             <TableBody>
-              {stableSort(rows, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
+              {
+                rows.map((row, index) => {
                   
                   const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${row.id}`;
@@ -449,18 +461,14 @@ export default function EnhancedTable(props) {
                     </TableRow>
                   );
                 })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
+           
             </TableBody>
           </Table>
         </TableContainer>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={props.jumlahdata}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={handleChangePage}

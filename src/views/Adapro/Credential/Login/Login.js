@@ -70,7 +70,7 @@ class Login extends Component {
     open:false,
     error:"",
     isOpen:false,
-    size:[window.innerWidth, window.innerHeight]
+    size:[0,0]
   }
   _handleClose = (event, reason)=>{
     if(reason === "clickaway"){
@@ -97,6 +97,13 @@ class Login extends Component {
   }
   handlereset(e){
 
+  }
+  componentDidUpdate(uu,preves,ss ){
+    if(preves.size[0]!==window.innerWidth){
+      this.setState({
+        size:[window.innerWidth, window.innerHeight]
+      })
+    }
   }
   _handleFormSubmit = (e) => {
     e.preventDefault();

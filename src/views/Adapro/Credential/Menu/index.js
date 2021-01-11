@@ -1,7 +1,7 @@
 import React,{useState, useEffect} from 'react';
 import API from 'api';
 import {Paper} from '@material-ui/core'
-import Table from './../../../../components/TableRole'
+import Table from './../../../../components/TableMenu'
 import {useSelector, useDispatch} from 'react-redux'
 import { Button} from 'reactstrap'
 import { AlternateEmail } from '@material-ui/icons';
@@ -10,17 +10,17 @@ import Dialog from './../../../../components/popupAll'
 
 const Depart = React.memo(() =>{
     let token = localStorage.getItem('id_token');
-    const [dataRoleAll, setDataRoleAll] = useState([]);
+    const [dataMenuAll, setDataMenuAll] = useState([]);
     const [open, setOpen] = useState(false);
     const [actionForm, setActionForm] = useState('');
-    const dataSelected = useSelector(state=>state.userSettingSelected);
-    const popupDepart = useSelector(state=>state.popupRole.isOpen);
-    const rowperpageRole = useSelector(state=>state.rowperpageRole);
     const [jumlahdata, setJumlahData] = useState(0);
+    const dataSelected = useSelector(state=>state.userSettingSelected);
+    const popupDepart = useSelector(state=>state.popupMenu.isOpen);
+    const rowperpageGroup = useSelector(state=>state.rowperpageMenu);
     const dispatch = useDispatch();
     const kirimisOpenDepart = (isOpen) => {
         return {
-          type: "OPENROLE",
+          type: "OPENMENU",
           payload: {
             isOpen: isOpen,
           }
@@ -42,7 +42,7 @@ const Depart = React.memo(() =>{
     const rowAdd =  React.useCallback(()=>{
         dispatch(kirimisOpenDepart(true))
         setOpen(true);
-        setActionForm("Add Role")
+        setActionForm("Add Menu")
     },[dataSelected])
     const rowEdit = React.useCallback(()=>{
         if(dataSelected.selectedUser==0){
@@ -50,7 +50,7 @@ const Depart = React.memo(() =>{
         }else{
             dispatch(kirimisOpenDepart(true))
             setOpen(true);
-            setActionForm("Edit Role")
+            setActionForm("Edit Menu")
 
         }
     },[dataSelected])
@@ -58,53 +58,60 @@ const Depart = React.memo(() =>{
         if(dataSelected.selectedUser==0){
             alert("no item selected")
         }else{
+            let hasil = "";
+            var fetches = [];
             for(let i=0;i<dataSelected.selectedId.length;i++){
                 let token = localStorage.getItem('id_token');
              
-                API.post("/credential_service/delete_role",{
+                fetches.push(API.post("/credential_service/delete_menu",{
                   key: token,
-                  group_id: dataSelected.selectedId[i]
+                  menu_id: dataSelected.selectedId[i]
                 }).then(data => {
-                alert("Role ID "+dataSelected.selectedId[i]+" "+data.data.data);
-                getRoleAll();
+                hasil = hasil +"Menu ID "+dataSelected.selectedId[i]+" "+data.data.data+"\n";
+             
                
               }).catch(err=>{
                   alert(err)
               })
-            }
+                )}
+
+            Promise.all(fetches).then(()=>{
+                alert(hasil);
+                getMenuAll();
+                dispatch(kirimSelected(0,[]));
+            })    
         }
 
     },[dataSelected])
-    const getRoleAll = React.useCallback((jumlah, halaman)=>{
-        API.post("/credential_service/get_role",{
+    const getMenuAll = React.useCallback((jumlah, halaman)=>{
+        API.post("/credential_service/get_menu",{
             key: token,
             info_data:'all',
             per_page:jumlah,
             page:halaman
         }).then(data => {
-            setDataRoleAll(data.data.data);
-           
+            setDataMenuAll(data.data.data);
             setJumlahData(data.data.count_data);
+           
            
           
             
           
         })
-    },[setDataRoleAll])
+    },[setDataMenuAll])
     useEffect(()=>{
-      getRoleAll(rowperpageRole.jumlah, rowperpageRole.halaman);
+        getMenuAll(rowperpageGroup.jumlah, rowperpageGroup.halaman);
         setOpen(popupDepart)
        
-    },[popupDepart,rowperpageRole.jumlah, rowperpageRole.halaman])
-    
+    },[popupDepart,rowperpageGroup.jumlah, rowperpageGroup.halaman])
     return(
     <div>
-        <Button color="dark" id="btnRowAdd" className="btn-pill" onClick={rowAdd}>&nbsp;&nbsp;<i className="fa fa-plus-square"></i>&nbsp;<span>Add&nbsp;&nbsp;</span></Button>
-        {dataSelected.selectedUser>0?<Button color="danger" id="btnRowDelete" className="btn-pill" onClick={rowDelete}><i className="fa fa-window-close"></i>&nbsp;<span>Delete</span></Button>:''}
-        {dataSelected.selectedUser==1?<Button color="warning" id="btnTableEdit" className="btn-pill" onClick={rowEdit}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-edit"></i>&nbsp;<span>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></Button> : null}
+        <Button  id="btnRowAdd" className="btn-pill btn-outline-dark btn-m" onClick={rowAdd}>&nbsp;&nbsp;<i className="fa fa-plus-square"></i>&nbsp;<span>Add&nbsp;&nbsp;</span></Button>
+        {dataSelected.selectedUser>0?<Button  id="btnRowDelete" className="btn-pill btn-outline-danger btn-m" onClick={rowDelete}><i className="fa fa-window-close"></i>&nbsp;<span>Delete</span></Button>:''}
+        {dataSelected.selectedUser==1?<Button color="warning" id="btnTableEdit" className="btn-pill btn-m" onClick={rowEdit}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-edit"></i>&nbsp;<span>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></Button> : null}
 
         
-        <Table data={dataRoleAll} jumlahdata={jumlahdata} groupName={""}></Table>
+        <Table data={dataMenuAll} jumlahdata={jumlahdata} groupName={""}></Table>
         <Dialog open={open} actionForm={actionForm}></Dialog>
 
 

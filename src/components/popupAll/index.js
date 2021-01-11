@@ -117,7 +117,13 @@ export default function CustomizedDialogs(props) {
    group_name:'',
    group_id:'',
    branch_id:'',
-   branch_name:''
+   branch_name:'',
+   menu_id:'',
+   report_id:'',
+   module_id:'',
+   menu_url:'',
+   menu_id:'',
+   menu_desc:'',
   })
   
 
@@ -184,6 +190,24 @@ const getGroupDetail = React.useCallback((id) => {  //on startup function
     })
     
 },[setDataChange])
+const getMenuDetail = React.useCallback((id) => {  //on startup function
+  let token = localStorage.getItem('id_token');
+
+  API.post("/credential_service/get_menu", {
+    key: token,
+    menu_id: id,
+    info_data: "detail"
+  }).then(data => {
+    let uaja = data.data.data;
+    
+    setDataChange({
+          menu_url:data.data.data.menu_url,
+          menu_id:data.data.data.menu_id,
+          menu_desc:data.data.data.menu_desc
+      }) 
+  })
+  
+},[setDataChange])
 const getRoleDetail = React.useCallback((id) => {  //on startup function
   let token = localStorage.getItem('id_token');
 
@@ -196,7 +220,10 @@ const getRoleDetail = React.useCallback((id) => {  //on startup function
     
     setDataChange({
           role_name:data.data.data.role_name,
-          role_id:data.data.data.role_id
+          role_id:data.data.data.role_id,
+          menu_id:data.data.data.menu_id,
+          module_id:data.data.data.module_id,
+          report_id:data.data.data.report_id
       }) 
   })
   
@@ -345,6 +372,57 @@ const getGroup = React.useCallback(() => {  //on startup function
   
         })
       }
+      else  if (actionForm == "Add Role") {
+        API.post("/credential_service/create_role", {
+          key: token,
+          
+          role_id:dataChange.role_id,
+          role_name:dataChange.role_name,
+          menu_id:dataChange.menu_id,
+          report_id:dataChange.report_id,
+          module_id:dataChange.module_id,
+         
+  
+        }).then(data => {
+  
+          // console.log(data.data)
+          alert("berhasil menambah")
+          setOpen(false);
+          dispatch(kirimisOpen(false,"CLOSEROLE"))
+          resetForm();
+          // this.setState({
+          //   dataSet: data.data.data
+          // });
+  
+        })
+      }
+      else if (actionForm == "Edit Role") {
+        API.post("/credential_service/update_role", {
+          key: token,
+        
+          role_id:dataChange.role_id,
+          role_name:dataChange.role_name,
+          menu_id:dataChange.menu_id,
+          report_id:dataChange.report_id,
+          module_id:dataChange.module_id,
+        }).then(data => {
+  
+          // console.log(data.data)
+          alert("berhasil Mengubah")
+          setOpen(false);
+          dispatch(kirimisOpen(false,"CLOSEROLE"))
+          resetForm();
+          // this.setState({
+          //   dataSet: data.data.data
+          // });
+  
+        }).catch((err) => {
+          alert("Anda Bukan Admin")
+          setOpen(false);
+          dispatch(kirimisOpen(false,"CLOSEROLE"))
+          resetForm();
+        })
+      }
     else  if (actionForm == "Add Group") {
         API.post("/credential_service/create_group", {
           key: token,
@@ -366,7 +444,53 @@ const getGroup = React.useCallback(() => {  //on startup function
   
         })
       }
-
+      else  if (actionForm == "Add Menu") {
+        API.post("/credential_service/create_menu", {
+          key: token,
+          
+         
+          menu_id:dataChange.menu_id,
+          menu_desc:dataChange.menu_desc,
+          menu_url:dataChange.menu_url
+  
+        }).then(data => {
+  
+          // console.log(data.data)
+          alert("berhasil menambah")
+          setOpen(false);
+          dispatch(kirimisOpen(false,"CLOSEMENU"))
+          resetForm();
+          // this.setState({
+          //   dataSet: data.data.data
+          // });
+  
+        })
+      }
+      else if (actionForm == "Edit Menu") {
+        API.post("/credential_service/update_menu", {
+          key: token,
+          menu_id:dataChange.menu_id,
+          menu_desc:dataChange.menu_desc,
+          menu_url:dataChange.menu_url
+  
+        }).then(data => {
+  
+          // console.log(data.data)
+          alert("berhasil Mengubah")
+          setOpen(false);
+          dispatch(kirimisOpen(false,"CLOSEMENU"))
+          resetForm();
+          // this.setState({
+          //   dataSet: data.data.data
+          // });
+  
+        }).catch((err) => {
+          alert("Anda Bukan Admin")
+          setOpen(false);
+          dispatch(kirimisOpen(false,"CLOSEMENU"))
+          resetForm();
+        })
+      }
      else if (actionForm == "Edit Group") {
         API.post("/credential_service/update_group", {
           key: token,
@@ -479,7 +603,13 @@ const getGroup = React.useCallback(() => {  //on startup function
         group_name:'',
         group_id:'',
         branch_id:'',
-        branch_name:''
+        branch_name:'',
+        menu_id:'',
+        report_id:'',
+        module_id:'',
+        menu_url:'',
+        menu_id:'',
+        menu_desc:'',
    
     })
     dispatch(kirimuserselected(0,[]))
@@ -509,8 +639,10 @@ const getGroup = React.useCallback(() => {  //on startup function
     }
     else if(props.actionForm=="Add Role" || props.actionForm=="Edit Role"){
       dispatch(kirimisOpen(false,"CLOSEROLE"))
-      
-  }
+    }
+    else if(props.actionForm=="Add Menu" || props.actionForm=="Edit Menu"){
+      dispatch(kirimisOpen(false,"CLOSEMENU"))
+    }
     dispatch(kirimuserselected(0,[]))
     setOpen(false);
     resetForm();
@@ -581,7 +713,22 @@ else if(actionForm=="Edit Role" || actionForm=="Add Role"){
     }
 }
 
+
 }
+else if(actionForm=="Edit Menu" || actionForm=="Add Menu"){
+  if (actionForm == "Add Menu") {
+  
+      resetForm();
+      // console.log(open)
+  //   let id = selectedusersetting.selectedId[0];
+  //   getUserDetail(id);
+  } else if(actionForm == "Edit Menu") {
+      resetForm();
+  
+    if(selected.selectedUser==1){
+        getMenuDetail(selected.selectedId[0]);
+    }
+}}
 
     
 
@@ -642,6 +789,7 @@ else if(actionForm=="Edit Role" || actionForm=="Add Role"){
                  
                 
                   options={dataGroup}
+                
                   value={dataChange.group_id?dataGroup.find(v => v.group_id == dataChange.group_id):''}
                   // getOptionSelected ={(option, value) => option === value?option:''}
                   getOptionLabel={(option) => option.group_name?option.group_name:""}
@@ -720,8 +868,90 @@ else if(actionForm=="Edit Role" || actionForm=="Add Role"){
        variant="outlined"
        name={"role_name"}
        value={dataChange.role_name} ></TextField>
+        <TextField
+       style={{ width:"100%",marginTop:"10px"}}
+       label={"Module ID"}
+       onChange={handleChange}
+       variant="outlined"
+       name={"module_id"}
+       type="number"
+       value={dataChange.module_id}
+       
+       // error={touched && invalid}
+       // helperText={touched && error}
+       // {...input}
+       // {...custom}
+       />           
+        <TextField
+       style={{ width:"100%",marginTop:"10px"}}
+       label={"Report ID"}
+       onChange={handleChange}
+       variant="outlined"
+       name={"report_id"}
+       type="number"
+       value={dataChange.report_id}
+       
+       // error={touched && invalid}
+       // helperText={touched && error}
+       // {...input}
+       // {...custom}
+       />     
+        <TextField
+       style={{ width:"100%",marginTop:"10px"}}
+       label={"Menu ID"}
+       onChange={handleChange}
+       variant="outlined"
+       name={"menu_id"}
+       type="number"
+       value={dataChange.menu_id}
+       
+       // error={touched && invalid}
+       // helperText={touched && error}
+       // {...input}
+       // {...custom}
+       />                 
    </div> 
        
+       :actionForm=="Edit Menu"||actionForm=="Add Menu"?
+       <div>
+       <TextField
+       style={{ width:"100%", marginTop:"10px"}}
+       label={"Menu ID"} 
+       onChange={handleChange}
+       variant="outlined"
+       name={"menu_id"}
+       type={"number"}
+       value={dataChange.menu_id} ></TextField>
+        <TextField
+       style={{ width:"100%",marginTop:"10px"}}
+       label={"Menu Description"}
+       onChange={handleChange}
+       variant="outlined"
+       name={"menu_desc"}
+       type="text"
+       value={dataChange.menu_desc}
+       
+       // error={touched && invalid}
+       // helperText={touched && error}
+       // {...input}
+       // {...custom}
+       />           
+        <TextField
+       style={{ width:"100%",marginTop:"10px"}}
+       label={"Menu Url"}
+       onChange={handleChange}
+       variant="outlined"
+       name={"menu_url"}
+       type="text"
+       value={dataChange.menu_url}
+       
+       // error={touched && invalid}
+       // helperText={touched && error}
+       // {...input}
+       // {...custom}
+       />     
+     
+       </div>  
        :''}
               </Grid>
 

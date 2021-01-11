@@ -8,11 +8,13 @@ const CredDepart = React.lazy(() => import('./views/Adapro/Credential/Depart'))
 const CredGroup = React.lazy(() => import('./views/Adapro/Credential/Group/group'))
 const CredBranch = React.lazy(() => import('./views/Adapro/Credential/Branch'))
 const CredRole = React.lazy(() => import('./views/Adapro/Credential/Role2'))
+const Menu = React.lazy(() => import('./views/Adapro/Credential/Menu'))
 const Kerno = React.lazy(() => import('./views/Adapro/Kerno'));
 
 const routes = [
   { path: '/', exact: true, name: 'Home', component: DefaultLayout },
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
+  { path: '/menu', name: 'Menu', component: Menu },
   { path: '/report/reportA', name: 'Report', component: Report },
   { path: '/usersetting/user', name: 'User Setting / User', component: CredUser },
   { path: '/usersetting/depart', name: 'User Setting / Depart', component: CredDepart },

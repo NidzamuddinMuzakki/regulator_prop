@@ -6,15 +6,17 @@ import {useSelector, useDispatch} from 'react-redux'
 import { Button} from 'reactstrap'
 import { AlternateEmail } from '@material-ui/icons';
 import Dialog from './../../../../components/popupAll'
-   
+import Tooltip from '@material-ui/core/Tooltip';     
 
 const Depart = React.memo(() =>{
     let token = localStorage.getItem('id_token');
     const [dataGroupAll, setDataGroupAll] = useState([]);
     const [open, setOpen] = useState(false);
     const [actionForm, setActionForm] = useState('');
+    const [jumlahdata, setJumlahData] = useState(0);
     const dataSelected = useSelector(state=>state.userSettingSelected);
     const popupDepart = useSelector(state=>state.popupGroup.isOpen);
+    const rowperpageGroup = useSelector(state=>state.rowperpageGroup);
     const dispatch = useDispatch();
     const kirimisOpenDepart = (isOpen) => {
         return {
@@ -56,30 +58,39 @@ const Depart = React.memo(() =>{
         if(dataSelected.selectedUser==0){
             alert("no item selected")
         }else{
+            let hasil = "";
+            var fetches = [];
             for(let i=0;i<dataSelected.selectedId.length;i++){
                 let token = localStorage.getItem('id_token');
              
-                API.post("/credential_service/delete_group",{
+                fetches.push(API.post("/credential_service/delete_group",{
                   key: token,
                   group_id: dataSelected.selectedId[i]
                 }).then(data => {
-                alert("Group ID "+dataSelected.selectedId[i]+" "+data.data.data);
-                getGroupAll();
+                hasil = hasil +"Group ID "+dataSelected.selectedId[i]+" "+data.data.data+"\n";
+                
                
               }).catch(err=>{
                   alert(err)
-              })
+              }))
             }
+            Promise.all(fetches).then(function(){
+              alert(hasil)
+            }).then(()=>{
+              getGroupAll(rowperpageGroup.jumlah, rowperpageGroup.halaman);
+            })
         }
 
     },[dataSelected])
-    const getGroupAll = React.useCallback(()=>{
+    const getGroupAll = React.useCallback((jumlah, halaman)=>{
         API.post("/credential_service/get_group",{
             key: token,
-            info_data:'all'
+            info_data:'all',
+            per_page:jumlah,
+            page:halaman
         }).then(data => {
             setDataGroupAll(data.data.data);
-           
+            setJumlahData(data.data.count_data);
            
            
           
@@ -88,18 +99,27 @@ const Depart = React.memo(() =>{
         })
     },[setDataGroupAll])
     useEffect(()=>{
-        getGroupAll();
+      getGroupAll(rowperpageGroup.jumlah, rowperpageGroup.halaman);
         setOpen(popupDepart)
        
-    },[popupDepart])
+    },[popupDepart,rowperpageGroup.jumlah, rowperpageGroup.halaman])
+  
     return(
     <div>
-        <Button color="dark" id="btnRowAdd" className="btn-pill" onClick={rowAdd}>&nbsp;&nbsp;<i className="fa fa-plus-square"></i>&nbsp;<span>Add&nbsp;&nbsp;</span></Button>
+        {/* <Button color="dark" id="btnRowAdd" className="btn-pill" onClick={rowAdd}>&nbsp;&nbsp;<i className="fa fa-plus-square"></i>&nbsp;<span>Add&nbsp;&nbsp;</span></Button>
         {dataSelected.selectedUser>0?<Button color="danger" id="btnRowDelete" className="btn-pill" onClick={rowDelete}><i className="fa fa-window-close"></i>&nbsp;<span>Delete</span></Button>:''}
-        {dataSelected.selectedUser==1?<Button color="warning" id="btnTableEdit" className="btn-pill" onClick={rowEdit}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-edit"></i>&nbsp;<span>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></Button> : null}
-
+        {dataSelected.selectedUser==1?<Button color="warning" id="btnTableEdit" className="btn-pill" onClick={rowEdit}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-edit"></i>&nbsp;<span>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></Button> : null} */}
+<Tooltip title="Add Group" aria-label="Add Group">
+         
+         <Button id="btnRowAdd" className="btn-pill btn-outline-dark btn-m" style={{fontSize:'20px'}} onClick={rowAdd}><i className="fa fa-plus-square"></i></Button>
+          
+         
+       </Tooltip>
+       {dataSelected.selectedUser>0?  <Tooltip title="Delete Group" aria-label="Delete Group"><Button style={{fontSize:'20px', marginLeft:'5px'}} id="btnRowDelete" className="btn-pill btn-outline-danger btn-m" onClick={rowDelete}><i className="fa fa-window-close"></i></Button></Tooltip>:''}
+       {dataSelected.selectedUser==1?<Tooltip title="Edit Group" aria-label="Edit Group"><Button color="warning" id="btnTableEdit" className="btn-pill btn-m" style={{fontSize:'20px', marginLeft:'5px'}} onClick={rowEdit}><i className="fa fa-edit"></i></Button></Tooltip> : null}
         
-        <Table data={dataGroupAll} groupName={""}></Table>
+        
+        <Table data={dataGroupAll} jumlahdata={jumlahdata} groupName={""}></Table>
         <Dialog open={open} actionForm={actionForm}></Dialog>
 
 

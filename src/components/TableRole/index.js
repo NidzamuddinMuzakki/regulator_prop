@@ -70,6 +70,9 @@ function EnhancedTableHead(props) {
     { id: 'Role_name', numeric: false, disablePadding: false, label: 'Role Name' },
     { id: 'create_time', numeric: false, disablePadding: false, label: 'Create Time' },
     { id: 'update_time', numeric: false, disablePadding: false, label: 'Update Time' },
+    { id: 'module_id', numeric: false, disablePadding: false, label: 'Module ID' },
+    { id: 'report_id', numeric: false, disablePadding: false, label: 'Report ID' },
+    { id: 'menu_id', numeric: false, disablePadding: false, label: 'Menu ID' },
  
 
 
@@ -231,20 +234,25 @@ export default function EnhancedTable(props) {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   let deptName = [];
   
-  function createData(id,no,roleName, crtDate, updDate) {
-    return { id,no,roleName,crtDate, updDate };
+  function createData(id,no,roleName, crtDate, updDate, moduleId, reportId, menuId) {
+    return { id,no,roleName,crtDate, updDate,moduleId, reportId, menuId };
   }
   const rows = [];
   
   let dataUser = props.data;
 // console.log(props.deptName[0])
+let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
   for(let i=0;i<dataUser.length;i++){
-    rows[i] = createData(dataUser[i].role_id,(i+1),dataUser[i].role_name, dataUser[i].created_time, dataUser[i].updated_time);
+    nomorTogel++;
+    rows[i] = createData(dataUser[i].role_id,(nomorTogel),dataUser[i].role_name, dataUser[i].created_time, dataUser[i].updated_time,dataUser[i].module_id,dataUser[i].report_id, dataUser[i].menu_id);
     
   }
 
   
-  
+  useEffect(()=>{
+    setSelected(selectedusersetting.selectedId);
+    console.log(selected)
+},[selectedusersetting.selectedId])
 
 
   const kirimuserselected = (jumlah, data)=>{
@@ -318,9 +326,7 @@ export default function EnhancedTable(props) {
     }
    
   },[selected])
-  useEffect(()=>{
-    setSelected([]);
-  }, [props.data])
+ 
   const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
     
@@ -348,13 +354,23 @@ export default function EnhancedTable(props) {
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
+    dispatch(kirimurowperpage(rowsPerPage, newPage+1))
   };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
+    dispatch(kirimurowperpage(event.target.value, 1))
     setPage(0);
   };
-
+  const kirimurowperpage = (jumlah, halaman)=>{
+    return{
+      type:"CHANGEROWROLE",
+      payload:{
+        jumlah: jumlah,
+        halaman:halaman
+      }
+    }
+  }
   const handleChangeDense = (event) => {
     setDense(event.target.checked);
   };
@@ -396,9 +412,8 @@ export default function EnhancedTable(props) {
               
             />
             <TableBody>
-              {stableSort(rows, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
+              {
+                rows.map((row, index) => {
                   
                   const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${row.id}`;
@@ -437,24 +452,23 @@ export default function EnhancedTable(props) {
                       <TableCell  >{row.roleName}</TableCell>
                       <TableCell  >{row.crtDate}</TableCell>
                       <TableCell  >{row.updDate}</TableCell>
+                      <TableCell  >{row.moduleId}</TableCell>
+                      <TableCell  >{row.reportId}</TableCell>
+                      <TableCell  >{row.menuId}</TableCell>
                       
                       
                       
                     </TableRow>
                   );
                 })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
+            
             </TableBody>
           </Table>
         </TableContainer>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={props.jumlahdata}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={handleChangePage}

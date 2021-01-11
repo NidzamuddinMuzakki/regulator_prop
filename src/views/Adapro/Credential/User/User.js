@@ -31,13 +31,17 @@ const mapDispatchToProps = dispatch =>{
   return {
     membuka:()=>dispatch({type:"OPEN", payload:{isOpen:true}}),
     kirimSelected:()=>dispatch({type:"SELECTEDUSER", payload:{ selectedUser: 0,
-      selectedId: []}})
+      selectedId: []}}),
+    kirimPaging:(jumlah,halaman)=>dispatch({type:"CHANGEROWUSER", payload:{ jumlah: jumlah,
+        halaman: halaman}})
   }
 }
 const userSelected1 = state => ({
   jumlah: state.userSettingSelected,
-  terbuka:state.popup
+  terbuka:state.popup,
+  perpage:state.rowperpageUser,
 })
+
 
 
 class UserView extends Component {
@@ -65,7 +69,10 @@ class UserView extends Component {
       isvalid : true,
       irnumber: 0,
       editStart: false,
-      isOpen:false
+      isOpen:false,
+      jumlah:0,
+      perpage:5,
+      halaman:1
     
      
     }
@@ -663,19 +670,23 @@ class UserView extends Component {
     
     })
   }
-  getUserData = () => {  //on startup function
+  getUserData = (jumlah, halaman) => {  //on startup function
     let token = localStorage.getItem('id_token');
    
     API.post("/credential_service/get_user",{
       key: token,
-      info_data:'all'
+      info_data:'all',
+      per_page:jumlah,
+      page:halaman
     }
     
     ).then(data => {
      
       this.setState({
-        dataSet: data.data.data
+        dataSet: data.data.data,
+        jumlah:data.data.count_data
       });
+      
       for(let i=0;i<data.data.data.length;i++){
         this.getUserDept(data.data.data[0].dept_id,i);
         this.getUserRole(data.data.data[0].role_id,i);
@@ -778,23 +789,30 @@ class UserView extends Component {
   // }
  
   rowDelete = (e) => {  //delete row
-    let hasil = "";
-   
 
-    
+  let hasil = "";
+var fetches = [];
     for(let i=0;i<this.props.jumlah.selectedId.length;i++){
       let token = localStorage.getItem('id_token');
    
-      API.post("/credential_service/delete_user",{
+      fetches.push(API.post("/credential_service/delete_user",{
         key: token,
         userId: this.props.jumlah.selectedId[i]
       }).then(data => {
-      alert("User ID "+this.props.jumlah.selectedId[i]+" "+data.data.data);
-      this.getUserData();
-     
-    })
+       hasil = hasil + "User ID "+this.props.jumlah.selectedId[i]+" "+data.data.data +"\n";
+      
+    }));
+  
     
   }
+
+  Promise.all(fetches).then(function() {
+    alert(hasil);
+  
+    
+  }).then(()=>{
+    this.getUserData(this.props.perpage.jumlah,this.props.perpage.halaman );
+  });
 }
   // editRowCancel = () => {  //edit row cancel button
   //   this.setState({
@@ -904,7 +922,7 @@ class UserView extends Component {
     Promise.all([
       // // Promise.resolve(this.getUserColWidth()),
       // Promise.resolve(this.getOptionData()),
-      Promise.resolve(this.getUserData()) 
+      Promise.resolve(this.getUserData(this.props.perpage.jumlah,this.props.perpage.halaman)) 
     ]).then(values => {
       console.log("ALL COMPLETED")
       console.log(values)
@@ -914,11 +932,14 @@ class UserView extends Component {
    }
   componentDidUpdate(prevProps, prevState, ss){
     // console.log(this.state.dept[0])
-    if(prevState.isOpen!==this.props.terbuka.isOpen){
-      this.getUserData();
+   
+    if(prevState.isOpen!==this.props.terbuka.isOpen || prevState.perpage!==this.props.perpage.jumlah || prevState.halaman!==this.props.perpage.halaman){
+      this.getUserData(this.props.perpage.jumlah,this.props.perpage.halaman);
       this.props.kirimSelected();
       this.setState({
-        isOpen :this.props.terbuka.isOpen
+        isOpen :this.props.terbuka.isOpen,
+        perpage:this.props.perpage.jumlah,
+        halaman:this.props.perpage.halaman
       })
   
 
@@ -928,153 +949,9 @@ class UserView extends Component {
     }
     // console.log(this.props.jumlah)
   }
-  toggleModalEdit = () => {
-    this.setState({
-      modalEdit: !this.state.modalEdit,
-    }, () => {
-      for(let i=0;i<this.cols.length;i++) {
-        this.cols[i].readOnly = false;
-      }
-    })
-  }
-  toggleModalAdd = () => {
-    this.setState({
-      modalAdd: !this.state.modalAdd,
-    }, () => {
 
-    })
-  }
-  toggleModalInsert = () => {
-    this.setState({
-      modalInsert: !this.state.modalInsert,
-    }, () => {
-
-    })
-  }
-  addRowCancel = () => {  //add row cancel button
-    this.setState({
-      modalAdd: !this.state.modalAdd
-    }, () => {
-
-    })
-  }
-  addRowSave = () => {  //add row save button
-    this.setState(prevState => ({
-      irnumber: prevState.irnumber+1
-    }),() => {
-      //compare data and push to dataChanges
-      let _tempSelRowData
-      let _tempChanges = []
-      let _tempChangesAll = []
-      for(let i=0;i<this.cols.length;i++) {
-          //push into changes
-          //[3, "username", null, "newuser_"]
-          _tempChanges = []
-          _tempChanges[0] = null//this.hotTableComponent.current.hotInstance.getDataAtCell(this.state.selRow-1,0)+'.'+this.hotTableComponent.current.hotInstance.getDataAtCell(this.state.selRow-1,1) //this.state.selRow-1
-          _tempChanges[1] = this.cols[i].data
-          _tempChanges[2] = null
-          _tempChanges[3] = this.state[this.cols[i].data]
-          _tempChanges[4] = ''
-          _tempChanges[5] = this.state.irnumber
-          _tempChangesAll.push(_tempChanges)
-      }
-      console.log("TEMP CHANGES ALL")
-      console.log(_tempChangesAll)
-      let tempObject = {Action:"", RowNumber:null, RecordData:{}}
-      let isExists = false
-      
-      for(let r=0;r<_tempChangesAll.length;r++) {
-        isExists = false
-
-        for(let i=0;i<this.dataChanges.length;i++) {
-          //if(this.dataChanges[i].RowNumber==_tempChangesAll[r][0]) {
-          if(this.dataChanges[i].id==_tempChangesAll[r][4]&&this.dataChanges[i].ir==_tempChangesAll[r][5]) {
-            isExists = true
-            //tempObject.RecordData[changes[0][1]] = changes[0][3]
-            this.dataChanges[i].RecordData[_tempChangesAll[r][1]] = _tempChangesAll[r][3]
-          }
-        }
-        
-        if(isExists == false) {
-          if(_tempChangesAll[r][4]==undefined||_tempChangesAll[r][4]==null||_tempChangesAll[r][4]=='') { //if(_tempChangesAll[r][2]==undefined) { //new record
-            tempObject.Action = 'I'
-            tempObject.id = _tempChangesAll[r][4]//this.hotTableComponent.current.hotInstance.getDataAtCell(_tempChangesAll[r][0],0)
-            tempObject.ir = _tempChangesAll[r][5]//this.hotTableComponent.current.hotInstance.getDataAtCell(_tempChangesAll[r][0],1)
-            tempObject.RecordData[_tempChangesAll[r][1]] = _tempChangesAll[r][3]
-          } else { //update record
-            tempObject.Action = 'U'
-            tempObject.id = _tempChangesAll[r][4]//this.hotTableComponent.current.hotInstance.getDataAtCell(_tempChangesAll[r][0],0)
-            tempObject.ir = _tempChangesAll[r][5]//this.hotTableComponent.current.hotInstance.getDataAtCell(_tempChangesAll[r][0],1)
-            tempObject.RecordData[_tempChangesAll[r][1]] = _tempChangesAll[r][3]
-          }
-          this.dataChanges.push(tempObject)
-          console.log("DATA CHANGES")
-          console.log(this.dataChanges)
-        }
-      }
-
-      //first approach : using datasource replacement
-      _tempSelRowData = Object.assign([], this.hotTableComponent.current.hotInstance.getSourceData())
-      let _tempRow = {}
-      let _allValid = true
-      console.log(this.state)
-      for(let i=0;i<this.cols.length;i++) {
-        if(this.cols[i].data=='ir'&&(this.state[this.cols[i].data]==null||this.state[this.cols[i].data]==undefined||this.state[this.cols[i].data]=='')) {
-          _tempRow[this.cols[i].data] = this.state.irnumber
-        } else {
-          _tempRow[this.cols[i].data] = this.state[this.cols[i].data]
-        }
-        //validate
-        let _valid = this.cols[i].data+'valid'
-        let _invalid = this.cols[i].data+'invalid'
-        let _invalidmsg = this.cols[i].data+'invalidmsg'
-        let validation = this.basicValidator(this.cols[i].data,this.state[this.cols[i].data])
-        this.setState(
-            {
-              [_valid]: validation.valid,
-              [_invalid]: !validation.valid,
-              [_invalidmsg]: validation.message
-            }, () => { 
-              
-            }
-        )
-        if(validation.valid==false) _allValid=false
-      }
-
-      //if all valid
-      if(_allValid) {
-        this.setState({
-          selRow: 0,
-          modalAdd: !this.state.modalAdd
-        }, () => {
-          _tempSelRowData.push(_tempRow)
-          this.hotTableComponent.current.hotInstance.loadData(_tempSelRowData)      
-        })
-      } else {
-        //alert('Invalid!')
-      }
-    })
-  }
-  insertRowCancel = () => {  //add row cancel button
-    this.setState({
-      modalInsert: !this.state.modalInsert,
-      rows: 1
-    }, () => {
-
-    })
-  }
-  insertRowSave = () => {
-    for(let i=0;i<this.state.rows;i++) {
-      this.rowInsert()
-    }
-
-    this.setState({
-      modalInsert: !this.state.modalInsert,
-      rows: 1
-    }, () => {
-
-    })
-  }
+  
+  
   render() {
     const { file } = this.state;
     return (
@@ -1229,7 +1106,7 @@ class UserView extends Component {
               </Card>
             </ModalBody>
           </Modal>
-        <Table data={this.state.dataSet} name="user" deptName={[...this.state.dept]}  roleName={[...this.state.role]} groupName={[...this.state.group]}/>
+        <Table data={this.state.dataSet} name="user" jumlahdata={this.state.jumlah} deptName={[...this.state.dept]}  roleName={[...this.state.role]} groupName={[...this.state.group]}/>
         <Dialog open={this.state.isOpen} actionForm={this.state.actionForm}></Dialog>
           {/* <HotTable ref={this.hotTableComponent} id="hot2" settings={this.hotSettings} licenseKey="non-commercial-and-evaluation" /> */}
         </div>

@@ -39,15 +39,7 @@ function descendingComparator(a, b, orderBy) {
   }
   return 0;
 }
-const kirimurowperpage = (jumlah, halaman)=>{
-  return{
-    type:"CHANGEROWGROUP",
-    payload:{
-      jumlah: jumlah,
-      halaman:halaman
-    }
-  }
-}
+
 function getComparator(order, orderBy) {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
@@ -74,10 +66,11 @@ function EnhancedTableHead(props) {
   // console.log("hay"+props.data)
   const headCells = [
     { id: 'no', numeric: true, disablePadding: true, label: 'No' },
-    { id: 'group_id', numeric: false, disablePadding: false, label: 'Group ID' },
-    { id: 'group_name', numeric: false, disablePadding: false, label: 'Group Name' },
-    { id: 'create_time', numeric: false, disablePadding: false, label: 'Create Time' },
-    { id: 'update_time', numeric: false, disablePadding: false, label: 'Update Time' },
+    { id: 'menu_id', numeric: false, disablePadding: false, label: 'Menu ID' },
+    { id: 'description', numeric: false, disablePadding: false, label: 'Description' },
+    { id: 'url', numeric: false, disablePadding: false, label: 'URL' },
+    { id: 'created_time', numeric: false, disablePadding: false, label: 'Created Time' },
+    { id: 'updated_time', numeric: false, disablePadding: false, label: 'Updated Time' },
  
 
 
@@ -233,26 +226,21 @@ export default function EnhancedTable(props) {
   const [hiding, setHiding] = React.useState("none");
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
-  const [selected, setSelected] = React.useState(selectedusersetting.selectedId);
+  const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   let deptName = [];
-  useEffect(()=>{
-      setSelected(selectedusersetting.selectedId);
-      console.log(selected)
-  },[selectedusersetting.selectedId])
-  function createData(id,no,groupName, crtDate, updDate) {
-    return { id,no,groupName,crtDate, updDate };
+  
+  function createData(id,no,menuDesc,menuUrl, crtDate, updDate) {
+    return { id,no,menuDesc,menuUrl,crtDate, updDate };
   }
   const rows = [];
   
   let dataUser = props.data;
-  console.log(props.data)
-  let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
+// console.log(props.deptName[0])
   for(let i=0;i<dataUser.length;i++){
-    nomorTogel++;
-    rows[i] = createData(dataUser[i].group_id,(nomorTogel),dataUser[i].group_name, dataUser[i].created_time, dataUser[i].updated_time);
+    rows[i] = createData(dataUser[i].menu_id,(i+1),dataUser[i].menu_desc,dataUser[i].menu_url ,dataUser[i].created_time, dataUser[i].updated_time);
     
   }
 
@@ -331,9 +319,9 @@ export default function EnhancedTable(props) {
     }
    
   },[selected])
-  // useEffect(()=>{
-  //   setSelected([]);
-  // }, [props.data])
+  useEffect(()=>{
+    setSelected([]);
+  }, [props.data])
   const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
     
@@ -361,14 +349,10 @@ export default function EnhancedTable(props) {
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
-    console.log(newPage+1, rowsPerPage)
-    dispatch(kirimurowperpage(rowsPerPage, newPage+1))
-   
   };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    dispatch(kirimurowperpage(event.target.value, 1))
     setPage(0);
   };
 
@@ -399,7 +383,7 @@ export default function EnhancedTable(props) {
           <Table
             className={classes.table}
             aria-labelledby="tableTitle"
-            size={'medium'}
+            size={dense ? 'small' : 'medium'}
             aria-label="enhanced table"
           >
             <EnhancedTableHead
@@ -413,8 +397,9 @@ export default function EnhancedTable(props) {
               
             />
             <TableBody>
-              {
-                rows.map((row, index) => {
+              {stableSort(rows, getComparator(order, orderBy))
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row, index) => {
                   
                   const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${row.id}`;
@@ -450,7 +435,8 @@ export default function EnhancedTable(props) {
                       <TableCell  >
                         {row.id}
                       </TableCell>
-                      <TableCell  >{row.groupName}</TableCell>
+                      <TableCell  >{row.menuDesc}</TableCell>
+                      <TableCell  >{row.menuUrl}</TableCell>
                       <TableCell  >{row.crtDate}</TableCell>
                       <TableCell  >{row.updDate}</TableCell>
                       
@@ -466,7 +452,7 @@ export default function EnhancedTable(props) {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={props.jumlahdata}
+          count={rows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={handleChangePage}

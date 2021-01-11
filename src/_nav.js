@@ -9,6 +9,14 @@ export default {
       },
     },
     {
+      name: 'Menu',
+      url: '/menu',
+      icon: 'icon-speedometer',
+      badge: {
+        variant: 'info',
+      },
+    },
+    {
       name: 'User Setting',
       url: '#2',
       icon: 'fa fa-user-circle-o',

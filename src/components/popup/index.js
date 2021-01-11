@@ -548,7 +548,7 @@ export default function CustomizedDialogs(props) {
                   name="dept_id"
 
                   options={dataDepart}
-                  value={dataChange.dept_id?dataDepart.find(v => v.dept_id == dataChange.dept_id):''}
+                  // value={dataChange.dept_id?dataDepart.find(v => v.dept_id == dataChange.dept_id):''}
                   getOptionSelected={(option, value) => option.dept_id === dataChange.dept_id}
                   getOptionLabel={(option) => option.dept_name?option.dept_name :""}
                   onChange={(e, value) => handleChange(convert("dept_id", value ? value.dept_id : ''))}
@@ -560,7 +560,7 @@ export default function CustomizedDialogs(props) {
                   id="group"
                   name="group_id"
                   options={dataGroup}
-                  value={dataChange.group_id?dataGroup.find(v => v.group_id == dataChange.group_id):""}
+                  // value={dataChange.group_id?dataGroup.find(v => v.group_id == dataChange.group_id):""}
                   getOptionSelected={(option, value) => option.group_id === dataChange.group_id}
                   getOptionLabel={(option) => option.group_name?option.group_name:""}
                   onChange={(e, value) => handleChange(convert("group_id", value ? value.group_id : ''))}
@@ -571,7 +571,7 @@ export default function CustomizedDialogs(props) {
    
 
 options={dataRole}
-                  value={dataChange.role_id?dataRole.find(v => v.role_id == dataChange.role_id):""}
+                  // value={dataChange.role_id?dataRole.find(v => v.role_id == dataChange.role_id):""}
                   getOptionSelected={(option, value) => option.role_name === "Admin"}
                   getOptionLabel={(option) =>option.role_name?option.role_name:""}
                   onChange={(e, value) => handleChange(convert("role_id", value ? value.role_id : ''))}
@@ -630,7 +630,7 @@ options={dataRole}
                 getOptionSelected={(option, value) => option.branch_id === dataChange.branch_id}
                 onChange={(e, value) => handleChange(convert("branch_id", value ? value.branch_id : ''))}
                 renderInput={(params) => <TextField style={{ margin: "10px" }} {...params} label="Branch" variant="outlined" />}
-                value={dataChange.branch_id?dataBranch.find(v => v.branch_id == dataChange.branch_id):""}
+                // value={dataChange.branch_id?dataBranch.find(v => v.branch_id == dataChange.branch_id):""}
               />
             </Grid>
           </Grid>

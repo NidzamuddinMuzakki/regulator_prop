@@ -10,11 +10,13 @@ import {Provider} from 'react-redux';
 import {createStore, combineReducers} from 'redux';
 import userSettingSelected from './reducers/userSettingReducer';
 import popup from './reducers/popup';
-import {popupDepart, popupGroup, popupBranch, popupRole} from './reducers/PopAll'
+import {popupDepart, popupGroup, popupBranch, popupRole, popupMenu} from './reducers/PopAll'
+import {rowperpageDepart,rowperpageGroup, rowperpageBranch, rowperpageRole,rowperpageUser, rowperpageMenu} from './reducers/rowPerpage'
 
 
 const rootReducer =createStore(combineReducers({
-    userSettingSelected, popup, popupDepart, popupGroup, popupBranch, popupRole
+    userSettingSelected, popup, popupDepart, popupGroup, popupBranch, popupRole, popupMenu,
+    rowperpageDepart,rowperpageGroup, rowperpageBranch, rowperpageRole, rowperpageMenu, rowperpageUser
     
 }),window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 ReactDOM.render(<Provider store={rootReducer}><App /></Provider>, document.getElementById('root'));
