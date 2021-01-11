@@ -408,7 +408,7 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={props.jumlahdata}
               
             />
             <TableBody>

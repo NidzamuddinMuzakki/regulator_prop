@@ -935,7 +935,7 @@ var fetches = [];
    
     if(prevState.isOpen!==this.props.terbuka.isOpen || prevState.perpage!==this.props.perpage.jumlah || prevState.halaman!==this.props.perpage.halaman){
       this.getUserData(this.props.perpage.jumlah,this.props.perpage.halaman);
-      this.props.kirimSelected();
+    
       this.setState({
         isOpen :this.props.terbuka.isOpen,
         perpage:this.props.perpage.jumlah,

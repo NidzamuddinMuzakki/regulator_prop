@@ -362,6 +362,7 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
     dispatch(kirimurowperpage(rowsPerPage, newPage+1))
+   
   };
 
   const handleChangeRowsPerPage = (event) => {
@@ -407,7 +408,7 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={props.jumlahdata}
               
             />
             <TableBody>
