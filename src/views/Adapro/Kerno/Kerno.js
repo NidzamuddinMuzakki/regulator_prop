@@ -143,7 +143,7 @@ class Kerno extends Component {
       <div>
         <div>
           <div style={{width: 800}}>
-            <FieldMapping {...option} />
+            {/* <FieldMapping {...option} /> */}
             <br/>
             <button onClick={this.getRelation.bind(this)}>Get Relation</button>
             <button onClick={this.sameLine.bind(this)}>Auto (Same Line)</button>

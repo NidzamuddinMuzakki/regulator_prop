@@ -64,17 +64,34 @@ function EnhancedTableHead(props) {
   };
 
   // console.log("hay"+props.data)
-  const headCells = [
-    { id: 'no', numeric: true, disablePadding: true, label: 'No' },
-    { id: 'dept_id', numeric: false, disablePadding: false, label: 'ID' },
-    { id: 'dept_name', numeric: false, disablePadding: false, label: 'Department' },
-    { id: 'group_name', numeric: false, disablePadding: false, label: 'Group' },
-    { id: 'create_time', numeric: false, disablePadding: false, label: 'Create Time' },
-    { id: 'update_time', numeric: false, disablePadding: false, label: 'Update Time' },
+  const headCells = [];
+  let i=0;
+  if(props.schema){
+    for(const key of props.schema ){
+      if(i==0){
+        headCells.push({ id: 'no', numeric: true, disablePadding: true, label: 'No' })
+  
+      }
+      else{
+        headCells.push({ id: key, numeric: false, disablePadding: false, label: key })
+      }
+      i++;
+    }
+    
+  }
+
+
+  // const headCells = [
+  //   { id: 'no', numeric: true, disablePadding: true, label: 'No' },
+  //   { id: 'dept_id', numeric: false, disablePadding: false, label: 'ID' },
+  //   { id: 'dept_name', numeric: false, disablePadding: false, label: 'Department' },
+  //   { id: 'group_name', numeric: false, disablePadding: false, label: 'Group' },
+  //   { id: 'create_time', numeric: false, disablePadding: false, label: 'Create Time' },
+  //   { id: 'update_time', numeric: false, disablePadding: false, label: 'Update Time' },
  
 
 
-  ];
+  // ];
   
   return (
   
@@ -190,7 +207,7 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(2),
   },
   table: {
-    minWidth: 750,
+    minWidth: 400,
   },
   tableRow: {
     
@@ -243,6 +260,7 @@ export default function EnhancedTable(props) {
 // console.log(props.deptName[0])
   for(let i=0;i<dataUser.length;i++){
     nomorTogel++;
+   
     rows[i] = createData(dataUser[i].dept_id,(nomorTogel),dataUser[i].dept_name,props.groupName[i] ,dataUser[i].created_time, dataUser[i].updated_time);
     
   }
@@ -307,7 +325,7 @@ export default function EnhancedTable(props) {
       setSelected([]);
     }
     else if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.id);
+      const newSelecteds = props.data.map((n) => n[props.schema[0]]);
       let jumlah = newSelecteds.length;
       
    
@@ -390,12 +408,12 @@ export default function EnhancedTable(props) {
           Nothing to see here, this tab is <em>extinct</em>!
         </div>
       </Tabs> */}
-        <EnhancedTableToolbar numSelected={selected.length} />
+        {/* <EnhancedTableToolbar numSelected={selected.length} /> */}
         <TableContainer>
           <Table
             className={classes.table}
             aria-labelledby="tableTitle"
-            size={dense ? 'small' : 'medium'}
+            size={'small'}
             aria-label="enhanced table"
           >
             <EnhancedTableHead
@@ -403,6 +421,7 @@ export default function EnhancedTable(props) {
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
+              schema={props.schema}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={props.jumlahdata}
@@ -410,10 +429,10 @@ export default function EnhancedTable(props) {
             />
             <TableBody>
               {
-                rows.map((row, index) => {
+                props.data.map((row, index) => {
                   
-                  const isItemSelected = isSelected(row.id);
-                  const labelId = `enhanced-table-checkbox-${row.id}`;
+                  const isItemSelected = isSelected(row[props.schema[0]]);
+                  const labelId = `enhanced-table-checkbox-${row[props.schema[0]]}`;
                   
                   return (
                     <TableRow
@@ -424,11 +443,11 @@ export default function EnhancedTable(props) {
                       style={{cursor:"pointer"}}
                       onMouseEnter={selected.length==0?handleEnter:null}
                       onMouseLeave={selected.length==0?handleLeave:null}
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={(event) => handleClick(event, row[props.schema[0]])}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={1}
-                      key={row.id}
+                      key={index}
                       selected={isItemSelected}
                     >
                       <TableCell  padding="checkbox">
@@ -440,16 +459,31 @@ export default function EnhancedTable(props) {
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
+                     
                       <TableCell >
-                        {row.no}
+                        {index+1+(rowsPerPage*(page+1)-rowsPerPage)}
                       </TableCell>
-                      <TableCell  >
+                      {props.schema.map((field, index1)=>{
+                          if(index1==0){
+
+                          }
+                          else{
+                           return(
+                            
+                            <TableCell key={index1} >
+                            {row[field]}
+                            </TableCell>
+
+                           );
+                          } 
+                      })}
+                      {/* <TableCell  >
                         {row.id}
                       </TableCell>
                       <TableCell  >{row.deptName}</TableCell>
                       <TableCell  >{row.groupName}</TableCell>
                       <TableCell  >{row.crtDate}</TableCell>
-                      <TableCell  >{row.updDate}</TableCell>
+                      <TableCell  >{row.updDate}</TableCell> */}
                       
                       
                       
@@ -461,6 +495,7 @@ export default function EnhancedTable(props) {
           </Table>
         </TableContainer>
         <TablePagination
+         style={{height:'50px',paddingTop:'-20px'}}
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
           count={props.jumlahdata}
@@ -470,10 +505,10 @@ export default function EnhancedTable(props) {
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </Paper>
-      <FormControlLabel
+      {/* <FormControlLabel
         control={<Switch checked={dense} onChange={handleChangeDense} />}
         label="Dense padding"
-      />
+      /> */}
     </div>
   );
 }

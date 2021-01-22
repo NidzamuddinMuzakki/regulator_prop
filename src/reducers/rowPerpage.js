@@ -90,12 +90,27 @@ function rowperpageUser(state = initialState, action){
             return state;
     }
 }
+function rowperpageLog(state = initialState, action){
+
+    switch(action.type){
+        case "CHANGEROWLOG":
+            const stateuser = {...state}
+            if(action.payload){
+                stateuser.jumlah = action.payload.jumlah;
+                stateuser.halaman = action.payload.halaman;
+            }
+            return {...stateuser}
+        default:
+            return state;
+    }
+}
 export {
     rowperpageDepart,
     rowperpageGroup,
     rowperpageBranch,
     rowperpageRole,
     rowperpageMenu,
-    rowperpageUser
+    rowperpageUser,
+    rowperpageLog
     
   };

@@ -11,12 +11,12 @@ import {createStore, combineReducers} from 'redux';
 import userSettingSelected from './reducers/userSettingReducer';
 import popup from './reducers/popup';
 import {popupDepart, popupGroup, popupBranch, popupRole, popupMenu} from './reducers/PopAll'
-import {rowperpageDepart,rowperpageGroup, rowperpageBranch, rowperpageRole,rowperpageUser, rowperpageMenu} from './reducers/rowPerpage'
-
-
+import {rowperpageDepart,rowperpageGroup, rowperpageBranch, rowperpageRole,rowperpageUser, rowperpageMenu,rowperpageLog} from './reducers/rowPerpage'
+import userAcces from './reducers/useracces';
+import {MenuAccess,menupilihan } from './reducers/menuAcces';
 const rootReducer =createStore(combineReducers({
     userSettingSelected, popup, popupDepart, popupGroup, popupBranch, popupRole, popupMenu,
-    rowperpageDepart,rowperpageGroup, rowperpageBranch, rowperpageRole, rowperpageMenu, rowperpageUser
+    rowperpageDepart,rowperpageGroup, rowperpageBranch, rowperpageRole, rowperpageMenu, rowperpageUser, userAcces, MenuAccess, menupilihan,rowperpageLog
     
 }),window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 ReactDOM.render(<Provider store={rootReducer}><App /></Provider>, document.getElementById('root'));

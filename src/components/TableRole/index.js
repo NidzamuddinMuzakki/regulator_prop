@@ -13,7 +13,7 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
-import Checkbox from '@material-ui/core/Checkbox';
+
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -26,7 +26,7 @@ import Tabs from  '../tabkomponen/tabs.js';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
-
+import Checkbox from '@material-ui/core/Checkbox';
 
 
 
@@ -64,19 +64,36 @@ function EnhancedTableHead(props) {
   };
 
   // console.log("hay"+props.data)
-  const headCells = [
-    { id: 'no', numeric: true, disablePadding: true, label: 'No' },
-    { id: 'Role_id', numeric: false, disablePadding: false, label: 'Role ID' },
-    { id: 'Role_name', numeric: false, disablePadding: false, label: 'Role Name' },
-    { id: 'create_time', numeric: false, disablePadding: false, label: 'Create Time' },
-    { id: 'update_time', numeric: false, disablePadding: false, label: 'Update Time' },
-    { id: 'module_id', numeric: false, disablePadding: false, label: 'Module ID' },
-    { id: 'report_id', numeric: false, disablePadding: false, label: 'Report ID' },
-    { id: 'menu_id', numeric: false, disablePadding: false, label: 'Menu ID' },
+  
+  const headCells = [];
+  let i=0;
+  if(props.schema){
+    for(const key of props.schema ){
+      if(i==0){
+        headCells.push({ id: 'no', numeric: true, disablePadding: true, label: 'No' })
+  
+      }
+      else{
+        headCells.push({ id: key, numeric: false, disablePadding: false, label: key })
+      }
+      i++;
+    }
+    
+  }
+
+  // const headCells = [
+  //   { id: 'no', numeric: true, disablePadding: true, label: 'No' },
+  //   { id: 'Role_id', numeric: false, disablePadding: false, label: 'Role ID' },
+  //   { id: 'Role_name', numeric: false, disablePadding: false, label: 'Role Name' },
+  //   { id: 'create_time', numeric: false, disablePadding: false, label: 'Create Time' },
+  //   { id: 'update_time', numeric: false, disablePadding: false, label: 'Update Time' },
+  //   { id: 'module_id', numeric: false, disablePadding: false, label: 'Module ID' },
+  //   { id: 'report_id', numeric: false, disablePadding: false, label: 'Report ID' },
+  //   { id: 'menu_id', numeric: false, disablePadding: false, label: 'Menu ID' },
  
 
 
-  ];
+  // ];
   
   return (
   
@@ -303,7 +320,7 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
       setSelected([]);
     }
     else if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.id);
+      const newSelecteds = props.data.map((n) => n[props.schema[0]]);
       let jumlah = newSelecteds.length;
       
    
@@ -393,12 +410,12 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
           Nothing to see here, this tab is <em>extinct</em>!
         </div>
       </Tabs> */}
-        <EnhancedTableToolbar numSelected={selected.length} />
+        {/* <EnhancedTableToolbar numSelected={selected.length} /> */}
         <TableContainer>
           <Table
             className={classes.table}
             aria-labelledby="tableTitle"
-            size={dense ? 'small' : 'medium'}
+            size={'small'}
             aria-label="enhanced table"
           >
             <EnhancedTableHead
@@ -406,6 +423,7 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
+              schema={props.schema}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={props.jumlahdata}
@@ -413,10 +431,10 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
             />
             <TableBody>
               {
-                rows.map((row, index) => {
+                props.data.map((row, index) => {
                   
-                  const isItemSelected = isSelected(row.id);
-                  const labelId = `enhanced-table-checkbox-${row.id}`;
+                  const isItemSelected = isSelected(row[props.schema[0]]);
+                  const labelId = `enhanced-table-checkbox-${row[props.schema[0]]}`;
                   
                   return (
                     <TableRow
@@ -427,14 +445,14 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
                       style={{cursor:"pointer"}}
                       onMouseEnter={selected.length==0?handleEnter:null}
                       onMouseLeave={selected.length==0?handleLeave:null}
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={(event) => handleClick(event, row[props.schema[0]])}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={1}
-                      key={row.id}
+                      key={index}
                       selected={isItemSelected}
                     >
-                      <TableCell  padding="checkbox">
+                      <TableCell key={"checkrow"}  padding="checkbox">
                         <Checkbox style={{display:hiding}}
                           checked={isItemSelected}
                           icon={<RadioButtonUncheckedIcon></RadioButtonUncheckedIcon>}
@@ -443,19 +461,24 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      <TableCell >
-                        {row.no}
+                      <TableCell  key={"norow"}>
+                        {index+1+(rowsPerPage*(page+1)-rowsPerPage)}
                       </TableCell>
-                      <TableCell  >
-                        {row.id}
-                      </TableCell>
-                      <TableCell  >{row.roleName}</TableCell>
-                      <TableCell  >{row.crtDate}</TableCell>
-                      <TableCell  >{row.updDate}</TableCell>
-                      <TableCell  >{row.moduleId}</TableCell>
-                      <TableCell  >{row.reportId}</TableCell>
-                      <TableCell  >{row.menuId}</TableCell>
-                      
+                      {props.schema.map((field, index1)=>{
+                          if(index1==0){
+
+                          }
+                       
+                          else{
+                           return(
+                            
+                            <TableCell key={index1} >
+                            {row[field]}
+                            </TableCell>
+
+                           );
+                          } 
+                      })}
                       
                       
                     </TableRow>
@@ -466,6 +489,7 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
           </Table>
         </TableContainer>
         <TablePagination
+        style={{height:'50px',paddingTop:'-20px'}}
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
           count={props.jumlahdata}
@@ -475,10 +499,10 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </Paper>
-      <FormControlLabel
+      {/* <FormControlLabel
         control={<Switch checked={dense} onChange={handleChangeDense} />}
         label="Dense padding"
-      />
+      /> */}
     </div>
   );
 }

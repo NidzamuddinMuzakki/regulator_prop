@@ -3,18 +3,22 @@ import Table from "./../../../../components/Table";
 import authMethod from './../../../../auth/authMethod';
 import {connect} from 'react-redux';
 import { bindActionCreators } from 'redux'
-import { Button, Row, Col, Modal, ModalBody, ModalFooter, ModalHeader, Form,
+import Tooltip from '@material-ui/core/Tooltip';  
+import Filterdata from './../../filter';
+import Skeleton from './../../../../components/Skeleton';
+import { saveAs } from 'file-saver';
+import axios from 'axios'
+import { Button,Col, Modal, ModalBody,  Form,
   FormGroup,
-  FormText, FormFeedback, 
+ FormFeedback, 
   Card,
   CardBody,
   CardFooter,
   CardHeader,Label,Input,
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButtonDropdown,
-  InputGroupText } from 'reactstrap'
+  } from 'reactstrap'
+ import QueryBuilder from 'react-querybuilder';
 
+import {Query, Builder, BasicConfig, Utils as QbUtils} from 'react-awesome-query-builder';
 import { HotTable } from '@handsontable/react';
 import Handsontable from 'handsontable';
 import API from 'api';
@@ -22,11 +26,44 @@ import decode from 'jwt-decode';
 import { cosh } from 'core-js/fn/number';
 import { data } from 'jquery';
 import Dialog from './../../../../components/popup';
+
+
+
+
+ 
+// You can load query value from your backend storage (for saving see `Query.onChange()`)
+
+
+
+
 const isOpen1 = (payload) => ({
   type: "OPEN",
   payload,
  
 })
+const fields = [
+  { name: 'Branch', label: 'Branch' },
+  { name: 'Department', label: 'Department' },
+  { name: 'Username', label: 'Username' },
+  { name: 'Name', label: 'Name' },
+  { name: 'Group', label: 'Group' },
+  { name: 'Nik', label: 'Nik' },
+  { name: 'Created Time', label: 'Created Time' },
+  { name: 'Updated Time', label: 'Created Time', value: false }
+];
+
+const operators = [
+  { name: "=", label: "=" },
+  { name: "!=", label: "!=" },
+  { name: "<", label: "<" },
+  { name: ">", label: ">" },
+  { name: "<=", label: "<=" },
+  { name: ">=", label: ">=" },
+  { name: "null", label: "Is Null" },
+  { name: "notNull", label: "Is Not Null" },
+  { name: "in", label: "In" },
+  { name: "notIn", label: "Not In" }
+];
 const mapDispatchToProps = dispatch =>{
   return {
     membuka:()=>dispatch({type:"OPEN", payload:{isOpen:true}}),
@@ -40,8 +77,9 @@ const userSelected1 = state => ({
   jumlah: state.userSettingSelected,
   terbuka:state.popup,
   perpage:state.rowperpageUser,
+  userAcces:state.userAcces,
+  MenuAcces:state.MenuAccess
 })
-
 
 
 class UserView extends Component {
@@ -66,13 +104,28 @@ class UserView extends Component {
       dept:[],
       role:[],
       group:[],
+      branch:[],
       isvalid : true,
       irnumber: 0,
       editStart: false,
       isOpen:false,
-      jumlah:0,
+      jumlah:5,
       perpage:5,
-      halaman:1
+      halaman:1,
+      filterOpen:false,
+      schema:[],
+      dataFilter:[],
+      schema1:[],
+      loading:true,
+      menuAcces:{access_view:false,
+      access_create:false,
+      access_update:false,
+      access_delete:false},
+      initValue : '["~#iM",["type","group","id","9a99988a-0123-4456-b89a-b1607f326fd8","children1",["~#iOM",["a98ab9b9-cdef-4012-b456-71607f326fd9",["^0",["type","rule","id","a98ab9b9-cdef-4012-b456-71607f326fd9","properties",["^0",["field","multicolor","operator","multiselect_equals","value",["~#iL",[["yellow","green"]]],"valueSrc",["^2",["value"]],"operatorOptions",null,"valueType",["^2",["multiselect"]]]],"path",["^2",["9a99988a-0123-4456-b89a-b1607f326fd8","a98ab9b9-cdef-4012-b456-71607f326fd9"]]]]]],"properties",["^0",["conjunction","AND","not",false]],"path",["^2",["9a99988a-0123-4456-b89a-b1607f326fd8"]]]]',
+
+
+
+       
     
      
     }
@@ -525,6 +578,17 @@ class UserView extends Component {
   //     })
   //   })
   // }
+  tableFilter = () => {
+    if(this.state.filterOpen){
+      this.setState({
+        filterOpen:false,
+      })
+    }else{
+      this.setState({
+        filterOpen:true,
+      })
+    }
+  }
   // tableFilter = () => { //Turn on/off filter
   //   this.setState({
   //     btnFilter: !this.state.btnFilter
@@ -575,18 +639,97 @@ class UserView extends Component {
       
   //   })
   // }
+  s2ab = (s)=> { 
+    // var buf = new ArrayBuffer(s.length); //convert s to arrayBuffer
+    var view = new Uint8Array(s);  //create uint8array as viewer
+    // for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; //convert to octet
+    return view;    
+}
   tableDownload = () => { //download
-    //window.open('http://localhost:3001/api/credential/user/download/excel', "_blank")
-    fetch('http://localhost:3001/api/credential/user/download/excel')
-			.then(response => {
-				response.blob().then(blob => {
-					let url = window.URL.createObjectURL(blob);
-					let a = document.createElement('a');
-					a.href = url;
-					a.download = 'user.xlsx';
-					a.click();
-				});
-		});
+    let token = localStorage.getItem('id_token');
+    axios.post('http://34.101.137.61:22112/credential_service/download_excel', { 
+      responseType: 'arraybuffer' , 
+   
+        key:token,
+        data:'user'
+      
+      })
+      .then((response) => {
+        saveAs(new Blob([new Uint8Array(response.data.file_excel.data)],{type:"application/octet-stream"}), 'user.xlsx');
+      });
+    
+   
+      // API.post("download_excel",{
+       
+      //     key: token,
+      //     data:"user",
+       
+      //     responseType: 'blob'
+      // }
+      //   // headers:
+      //   //     {
+      //   //         'Content-Disposition': "attachment; filename=template.xlsx",
+      //   //         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      //   //     }
+      //   //   }    
+      // ).then(response=> {
+      //     console.log(response.data.file_excel.data.length)
+      //     // console.log(response.data.file_excel.data.charCodeAt(0))
+      //     // const url = window.URL.createObjectURL(new Blob([response.data.file_excel.data],{type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,"}));
+      //     // console.log(url)         
+      //     // const buf = new ArrayBuffer(response.data.file_excel.data.length);
+      // // const view = new Uint8Array(buf);
+      // // for (let i = 0; i != response.data.file_excel.data.length; ++i) view[i] = response.data.file_excel.data.charCodeAt(i) & 0xFF;
+      // const blob = new Blob([response.data.file_excel.data], {
+      //   type: 'application/octet-stream'
+      // });
+      // const a = window.document.createElement('a');
+      // a.href = window.URL.createObjectURL(blob, {
+      //   type: 'data:attachment/xlsx'
+      // });
+      // a.download = 'yourFileName.xlsx';
+      // document.body.appendChild(a);
+      // a.click();
+      // document.body.removeChild(a);
+      // Automatically download the file by appending an a element,
+      // 'clicking' it, and removing the element
+      // const a = window.document.createElement('a');
+      // a.href = window.URL.createObjectURL(blob, {
+      //   type: 'data:attachment/xlsx'
+      // });
+      // a.download = 'yourFileName.xlsx';
+      // document.body.appendChild(a);
+      // a.click();
+      // document.body.removeChild(a);
+          // saveAs(url, "user.xlsx");
+      // })
+        
+        // const link = document.createElement('a');
+        // link.href = url;
+        // link.setAttribute('download', 'template.xlsx');
+        // document.body.appendChild(link);
+        // link.click();
+
+
+
+
+        //window.open('http://localhost:3001/api/credential/user/download/excel', "_blank")
+        // fetch('http://localhost:3001/api/credential/user/download/excel')
+        // this.setState({
+        //   dataSet: data.data.data
+        // });
+		// 	.then(response => {
+		// 		response.blob().then(blob => {
+		// 			let url = window.URL.createObjectURL(blob);
+		// 			let a = document.createElement('a');
+		// 			a.href = url;
+		// 			a.download = 'user.xlsx';
+		// 			a.click();
+		// 		});
+    // });
+    
+
+
   }
   // handleChange = (e) => {
   //   let _valid = e.target.name+'valid'
@@ -606,74 +749,109 @@ class UserView extends Component {
   //       }
   //   )
   // }
-  getUserDept = (id,i) => {  //on startup function
-    let token = localStorage.getItem('id_token');
+  // getUserDept = (id,i) => {  //on startup function
+  //   let token = localStorage.getItem('id_token');
    
-    API.post("/credential_service/get_department",{
-      key: token,
-      dept_id: id,
-      info_data:'detail'
-    }
+  //   API.post("get_department",{
+  //     key: token,
+  //     dept_id: id,
+  //     info_data:'detail'
+  //   }
     
-    ).then(data => {
+  //   ).then(data => {
       
-      let u = data.data.data.dept_name;
-      this.setState(prevState => ({
-        dept: [...prevState.dept, u]
-      }))
-      // this.setState({
-      //   dataSet: data.data.data
-      // });
+  //     let u = data.data.data.dept_name;
+  //     this.setState(prevState => ({
+  //       dept: [...prevState.dept, u]
+  //     }))
+  //     // this.setState({
+  //     //   dataSet: data.data.data
+  //     // });
     
-    })
+  //   })
+  // }
+  renderAll = (data)=>{
+      this.setState({
+        loading:true,
+      })
+      this.setState({
+        dataSet:data,
+        loading:false
+      })
+      
+    
   }
-  getUserGroup = (id,i) => {  //on startup function
-    let token = localStorage.getItem('id_token');
+  // getUserBranch = (id,i) => {  //on startup function
+  //   let token = localStorage.getItem('id_token');
    
-    API.post("/credential_service/get_group",{
-      key: token,
-      group_id: id,
-      info_data:'detail'
-    }
+  //   API.post("get_branch",{
+  //     key: token,
+  //     branch_id: id,
+  //     info_data:'detail'
+  //   }
     
-    ).then(data => {
+  //   ).then(data => {
       
-      let u = data.data.data.group_name;
-      this.setState(prevState => ({
-        group: [...prevState.group, u]
-      }))
-      // this.setState({
-      //   dataSet: data.data.data
-      // });
+  //     let u = data.data.data.branch_name;
+  //     this.setState(prevState => ({
+  //       branch: [...prevState.branch, u]
+  //     }))
+  //     // this.setState({
+  //     //   dataSet: data.data.data
+  //     // });
     
-    })
-  }
-  getUserRole = (id,i) => {  //on startup function
-    let token = localStorage.getItem('id_token');
+  //   })
+  // }
+  // getUserGroup = (id,i) => {  //on startup function
+  //   let token = localStorage.getItem('id_token');
    
-    API.post("/credential_service/get_role",{
-      key: token,
-      role_id: id,
-      info_role:'detail'
-    }
+  //   API.post("get_group",{
+  //     key: token,
+  //     group_id: id,
+  //     info_data:'detail'
+  //   }
     
-    ).then(data => {
+  //   ).then(data => {
       
-      let u = data.data.data.role_name;
-      // console.log(data.data.data)
-      this.setState(prevState => ({
-        role: [...prevState.role, u]
-      }))
-      // this.setState({
-      //   dataSet: data.data.data
-      // });
+  //     let u = data.data.data.group_name;
+     
+  //     this.setState(prevState => ({
+  //       group: [...prevState.group, u]
+  //     }))
+  //     // this.setState({
+  //     //   dataSet: data.data.data
+  //     // });
     
-    })
-  }
+  //   })
+  // }
+  // getUserRole = (id,i) => {  //on startup function
+  //   let token = localStorage.getItem('id_token');
+   
+  //   API.post("get_role",{
+  //     key: token,
+  //     role_id: id,
+  //     info_role:'detail'
+  //   }
+    
+  //   ).then(data => {
+      
+  //     let u = data.data.data.role_name;
+  //     // console.log(data.data.data)
+  //     this.setState(prevState => ({
+  //       role: [...prevState.role, u]
+  //     }))
+  //     // this.setState({
+  //     //   dataSet: data.data.data
+  //     // });
+    
+  //   })
+  // }
   getUserData = (jumlah, halaman) => {  //on startup function
     let token = localStorage.getItem('id_token');
-   
-    API.post("/credential_service/get_user",{
+    this.setState({
+      loading:true,
+    })
+    API.post("get_user",{
       key: token,
       info_data:'all',
       per_page:jumlah,
@@ -684,37 +862,42 @@ class UserView extends Component {
      
       this.setState({
         dataSet: data.data.data,
-        jumlah:data.data.count_data
+        jumlah:data.data.count_data,
+        schema:Object.keys(data.data.data[0]),
+        dataFilter:data.data.field_filter_name,
+        schema1:Object.keys(data.data.field_filter_name[0]),
+        loading:false
       });
-      
-      for(let i=0;i<data.data.data.length;i++){
-        this.getUserDept(data.data.data[0].dept_id,i);
-        this.getUserRole(data.data.data[0].role_id,i);
-        this.getUserGroup(data.data.data[0].group_id,i);
+     
+      // for(let i=0;i<data.data.data.length;i++){
+      //   this.getUserDept(data.data.data[0].dept_id,i);
+      //   this.getUserRole(data.data.data[0].role_id,i);
+      //   this.getUserGroup(data.data.data[0].group_id,i);
+      //   this.getUserBranch(data.data.data[0].branch_id,i);
   
-      }
+      // }
     })
     
   }
   
-  getOptionData = () => {  //on startup function
-    let token = localStorage.getItem('id_token');
-    API.post("/credential_service/get_user",{
-      key: token,
-      userId: '1'
-    }).then(data => {
-      // console.log(data.data.data);
+  // getOptionData = () => {  //on startup function
+  //   let token = localStorage.getItem('id_token');
+  //   API.post("/credential_service/get_user",{
+  //     key: token,
+  //     userId: '1'
+  //   }).then(data => {
+  //     // console.log(data.data.data);
       
     
-      // this.cols[1].source = data.data.data[0].role_id
+  //     // this.cols[1].source = data.data.data[0].role_id
 
     
       
-      // this.hotSettings.columns = this.cols;
-      // this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)
+  //     // this.hotSettings.columns = this.cols;
+  //     // this.hotTableComponent.current.hotInstance.updateSettings(this.hotSettings)
 
-    })
-  }
+  //   })
+  // }
   // getUserColWidth = () => {  //on startup function
   //   API.get("/credential-service/user/preference/get?page=user&component=colWidths").then(data => {
     
@@ -748,7 +931,16 @@ class UserView extends Component {
         actionForm:"EDIT USER"
       })
       this.props.membuka();
+      
  }
+ rowChangePass = () => {  //edit row
+  this.setState({
+    isOpen:true,
+    actionForm:"CHANGE PASS"
+  })
+  this.props.membuka();
+ }
+ 
   // rowEdit = () => {  //edit row
   //   if(this.hotTableComponent.current.hotInstance.getSelected()==undefined) {
   //     alert("Please select 1 row")
@@ -795,7 +987,7 @@ var fetches = [];
     for(let i=0;i<this.props.jumlah.selectedId.length;i++){
       let token = localStorage.getItem('id_token');
    
-      fetches.push(API.post("/credential_service/delete_user",{
+      fetches.push(API.post("delete_user",{
         key: token,
         userId: this.props.jumlah.selectedId[i]
       }).then(data => {
@@ -808,7 +1000,7 @@ var fetches = [];
 
   Promise.all(fetches).then(function() {
     alert(hasil);
-  
+    
     
   }).then(()=>{
     this.getUserData(this.props.perpage.jumlah,this.props.perpage.halaman );
@@ -919,6 +1111,24 @@ var fetches = [];
   // }
   componentWillMount() {
     this.props.kirimSelected();
+    console.log(this.props.MenuAcces)
+    if(this.props.MenuAcces.menu){
+      let cuyaja = this.props.MenuAcces.menu;
+      for(const key of cuyaja){
+       
+        if(key.name=="user"){
+         
+            this.setState({
+              menuAcces:{ 
+                access_view:(key.access_view === 'true'),
+                access_create:(key.access_create === 'true'),
+                access_update:(key.access_update === 'true'),
+                access_delete:(key.access_delete === 'true')
+              }
+            })
+        }
+      }
+    }
     Promise.all([
       // // Promise.resolve(this.getUserColWidth()),
       // Promise.resolve(this.getOptionData()),
@@ -930,9 +1140,21 @@ var fetches = [];
    
     
    }
+  
+  
+  onChange = (immutableTree, config) => {
+    // Tip: for better performance you can apply `throttle` - see `examples/demo`
+    this.setState({tree: immutableTree, config: config});
+
+    const jsonTree = QbUtils.getTree(immutableTree);
+    console.log(jsonTree);
+    // `jsonTree` can be saved to backend, and later loaded to `queryValue`
+  }
   componentDidUpdate(prevProps, prevState, ss){
     // console.log(this.state.dept[0])
-   
+    console.log(this.state.menuAcces.access_create)    
+    
+    
     if(prevState.isOpen!==this.props.terbuka.isOpen || prevState.perpage!==this.props.perpage.jumlah || prevState.halaman!==this.props.perpage.halaman){
       this.getUserData(this.props.perpage.jumlah,this.props.perpage.halaman);
     
@@ -943,22 +1165,39 @@ var fetches = [];
       })
   
 
-    }else{
-     
-      // console.log("cuy")
     }
+    // if(prevState.dataSet!=this.state.dataSet){
+        
+    // }
     // console.log(this.props.jumlah)
   }
 
   
   
-  render() {
+  render() { 
     const { file } = this.state;
     return (
-        <div id="hot-app">
-          <Button color="dark" id="btnRowAdd" className="btn-pill" onClick={this.rowAdd}>&nbsp;&nbsp;<i className="fa fa-plus-square"></i>&nbsp;<span>Add&nbsp;&nbsp;</span></Button>
-          {this.props.jumlah.selectedUser>0?<Button color="danger" id="btnRowDelete" className="btn-pill" onClick={this.rowDelete}><i className="fa fa-window-close"></i>&nbsp;<span>Delete</span></Button>:''}
-          {this.props.jumlah.selectedUser==1?<Button color="warning" id="btnTableEdit" className="btn-pill" onClick={this.rowEdit}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-edit"></i>&nbsp;<span>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></Button> : null}
+      <div id="hot-app" style={{marginTop:'-22px'}}>
+         
+          {this.state.loading==false ?
+          <div>          {this.state.menuAcces.access_create && this.state.menuAcces.access_create==true ?
+          
+          <Tooltip title="Add User" aria-label="Add User">
+            <Button  id="btnRowAdd" className="btn-pill btn-outline-dark btn-m" style={{fontSize:'20px'}} onClick={this.rowAdd}><i className="fa fa-plus-square"></i></Button>
+
+          </Tooltip>
+          
+          :""}
+       
+            {this.props.jumlah.selectedUser>0 &&  this.state.menuAcces.access_delete==true?   <Tooltip title="Delete User" aria-label="Delete User"><Button  id="btnRowDelete" className="btn-pill btn-outline-danger btn-m" style={{fontSize:'20px', marginLeft:'5px'}} onClick={this.rowDelete}><i className="fa fa-window-close"></i></Button></Tooltip>:''}
+
+       
+       
+            {this.props.jumlah.selectedUser==1  && this.state.menuAcces.access_update==true?   <Tooltip title="Edit User" aria-label="Edit User"><Button color="warning" id="btnTableEdit" className="btn-pill btn-m" style={{fontSize:'20px', marginLeft:'5px'}} onClick={this.rowEdit}><i className="fa fa-edit"></i></Button></Tooltip> : null}
+            {this.props.jumlah.selectedUser==1  && this.state.menuAcces.access_update==true?   <Tooltip title="Change Password" aria-label="Change Password"><Button color="success" id="btnTableEdit" className="btn-pill btn-m" style={{fontSize:'20px', marginLeft:'5px'}} onClick={this.rowChangePass}><i className="fa fa-key"></i></Button></Tooltip> : null}
+
+          
+
         
 
           {/* {this.state.btnSave ? <Button color="secondary" id="btnTableEditReset" className="btn-pill" onClick={this.tableReset}><i className="fa fa-undo"></i>&nbsp;<span>Cancel</span></Button> : null} */}
@@ -969,9 +1208,10 @@ var fetches = [];
           {/* {this.state.btnSave ? <Button color="primary" id="btnRowInsert" className="btn-pill" onClick={this.toggleModalInsert}>&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-clone"></i>&nbsp;<span>Insert&nbsp;&nbsp;&nbsp;&nbsp;</span></Button> : null} */}
           
          
-          <Button color="light" id="btnFilter"  className="btn-pill" onClick={this.tableFilter}>&nbsp;&nbsp;&nbsp;&nbsp;<i className="fa fa-filter"></i>&nbsp;<span>Filter&nbsp;&nbsp;&nbsp;&nbsp;</span></Button>
+          <Tooltip title="Filter User" aria-label="Filter User"><Button  id="btnFilter"  className="btn-pill btn-outline-light btn-m" style={{fontSize:'20px', marginLeft:'5px'}} onClick={this.tableFilter}><i className="fa fa-filter"></i></Button></Tooltip>
+          <Tooltip title="Download User" aria-label="Download User"><Button  id="btnDownload"  className="btn-pill btn-outline-info btn-m" style={{fontSize:'20px', marginLeft:'5px'}} onClick={this.tableDownload}><i className="fa fa-cloud-download"></i></Button></Tooltip>
          
-            <Button style={{marginLeft:"30px"}} color="info" id="btnTableDownload"  className="btn-pill" onClick={this.tableDownload}><i className="fa fa-cloud-download"></i>&nbsp;<span>Download</span></Button>
+          {/* <Tooltip  title="Download User" aria-label="Download User"> <Button style={{fontSize:'20px', marginLeft:'5px'}}  id="btnTableDownload"  className="btn-pill btn-outline-info btn-m" onClick={this.tableDownload}><i className="fa fa-cloud-download" ></i></Button></Tooltip> */}
             {/* <Button color="info" id="btnTableUpload"  className="btn-pill" onClick={this.tableDownload}><i className="fa fa-cloud-download"></i>&nbsp;<span>Download</span></Button> */}
 
           
@@ -1106,13 +1346,48 @@ var fetches = [];
               </Card>
             </ModalBody>
           </Modal>
-        <Table data={this.state.dataSet} name="user" jumlahdata={this.state.jumlah} deptName={[...this.state.dept]}  roleName={[...this.state.role]} groupName={[...this.state.group]}/>
+
+                        {this.state.filterOpen? 
+                        
+                        <Card>
+                            <CardHeader><strong><i className="fa fa-filter"></i>&nbsp;Source Filter</strong></CardHeader>
+                            <CardBody bodystyle={{padding: "0"}}>
+                                <Filterdata data={this.state.dataFilter} name={"user"} onClick={this.renderAll} schema={this.state.schema1} name="user" jumlahdata={this.state.jumlah} deptName={[...this.state.dept]}  roleName={[...this.state.role]} groupName={[...this.state.group]}></Filterdata>
+                                {/* <QueryBuilder fields={fields} operators={operators} /> */}
+                                {/* <QueryBuilderComponent /> */}
+                                {/* <Query 
+                                   
+                                ></Query> */}
+                                  {/* <Query 
+                                    {...BasicConfig}{...fields}
+                                    value={loadTree(this.state.initValue)}
+                                    get_children={this.getChildren}
+                                    onChange={this.changes}
+                                ></Query> */}
+
+                            
+                            </CardBody>
+                        </Card>
+
+                        :'' }
+
+
+        <Table data={this.state.dataSet} schema={this.state.schema} name="user" jumlahdata={this.state.jumlah} deptName={[...this.state.dept]} branchName={[...this.state.branch]}  roleName={[...this.state.role]} groupName={[...this.state.group]}/>
         <Dialog open={this.state.isOpen} actionForm={this.state.actionForm}></Dialog>
           {/* <HotTable ref={this.hotTableComponent} id="hot2" settings={this.hotSettings} licenseKey="non-commercial-and-evaluation" /> */}
+          </div>
+
+      :<Skeleton></Skeleton>}
         </div>
     )
+    
   }
+
 }
+
+
+
+
 
 export default connect(userSelected1,mapDispatchToProps )(UserView);
 

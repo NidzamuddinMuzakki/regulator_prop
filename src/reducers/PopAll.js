@@ -114,6 +114,7 @@ function popupBranch(state = initialState, action){
             return state;
     }
 }
+
 export {
     popupDepart,
     popupGroup,

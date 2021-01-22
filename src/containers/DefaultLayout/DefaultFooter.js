@@ -15,7 +15,7 @@ class DefaultFooter extends Component {
 
     return (
       <React.Fragment>
-        <span><a href="#">Adapro Nusa Data</a> &copy; 2019</span>
+        <span><a href="#">Adapro Nusa Data</a> &copy; 2021</span>
       </React.Fragment>
     );
   }

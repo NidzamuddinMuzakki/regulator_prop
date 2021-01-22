@@ -26,7 +26,7 @@ import Tabs from  '../tabkomponen/tabs.js';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
-
+import Skeleton from './../Skeleton';
 
 
 
@@ -64,24 +64,39 @@ function EnhancedTableHead(props) {
   };
 
   // console.log("hay"+props.data)
-  const headCells = [
-    { id: 'no', numeric: true, disablePadding: true, label: 'No' },
-    { id: 'username', numeric: false, disablePadding: false, label: 'Username' },
-    { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
-    { id: 'password', numeric: false, disablePadding: false, label: 'Password' },
-    { id: 'role', numeric: false, disablePadding: false, label: 'Role' },
-    { id: 'nik', numeric: false, disablePadding: false, label: 'Nik' },
-    { id: 'dept', numeric: false, disablePadding: false, label: 'Departement' },
-    { id: 'group', numeric: false, disablePadding: false, label: 'Group' },
+  const headCells = [];
+  let i=0;
+  if(props.schema){
+    for(const key of props.schema ){
+      if(i==0){
+        headCells.push({ id: 'no', numeric: true, disablePadding: true, label: 'No' })
+  
+      }
+      else{
+        headCells.push({ id: key, numeric: false, disablePadding: false, label: key })
+      }
+      i++;
+    }
+    
+  }
+//  headCells = [
+//     { id: 'username', numeric: false, disablePadding: false, label: 'Username' },
+//     { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
+//     { id: 'password', numeric: false, disablePadding: false, label: 'Password' },
+//     { id: 'role', numeric: false, disablePadding: false, label: 'Role' },
+//     { id: 'nik', numeric: false, disablePadding: false, label: 'Nik' },
+//     { id: 'dept', numeric: false, disablePadding: false, label: 'Departement' },
+//     { id: 'group', numeric: false, disablePadding: false, label: 'Group' },
 
 
-  ];
+//   ];
+
   
   return (
   
     <TableHead>
-      <TableRow>
-        <TableCell padding="checkbox">
+      <TableRow >
+        <TableCell  padding="checkbox">
           <Checkbox
            color = "primary"
            indeterminateIcon={<RemoveCircleIcon/>}
@@ -96,12 +111,13 @@ function EnhancedTableHead(props) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-           
-            padding={'default'}
+          
+          
+            // padding={20}
             sortDirection={orderBy === headCell.id ? order : false}
           >
            
-              {headCell.label}
+              {headCell.label }
              
            
           </TableCell>
@@ -235,22 +251,23 @@ export default function EnhancedTable(props) {
   useEffect(()=>{
     setSelected(selectedusersetting.selectedId);
 },[selectedusersetting.selectedId])
-  function createData(id,no,username, name, password,role,nik, dept, group) {
-    return { id,no,username, name, password,role, nik, dept, group };
+
+  function createData(userdata) {
+    return {userdata};
   }
   const rows = [];
   
   let dataUser = props.data;
 // console.log(props.deptName[0])
-let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
-  for(let i=0;i<dataUser.length;i++){
-    nomorTogel++;
-    rows[i] = createData(dataUser[i].user_id,(nomorTogel),dataUser[i].username, dataUser[i].name, dataUser[i].password,props.roleName[i], dataUser[i].nik,props.deptName[i], props.groupName[i]);
+// let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
+//   for(let i=0;i<dataUser.length;i++){
+//     nomorTogel++;
+//     rows[i] = createData(dataUser[i].user_id,(nomorTogel),dataUser[i].username, dataUser[i].name, dataUser[i].password,props.roleName[i], dataUser[i].nik,props.deptName[i], props.groupName[i]);
     
-  }
+//   }
 
   
-  
+
 
 
   const kirimuserselected = (jumlah, data)=>{
@@ -310,7 +327,7 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
       setSelected([]);
     }
     else if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.id);
+      const newSelecteds = props.data.map((n) => n[props.schema[0]]);
       let jumlah = newSelecteds.length;
       
    
@@ -393,15 +410,18 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
           Nothing to see here, this tab is <em>extinct</em>!
         </div>
       </Tabs> */}
-        <EnhancedTableToolbar numSelected={selected.length} />
+        {/* <EnhancedTableToolbar numSelected={selected.length} /> */}
         <TableContainer>
+         
           <Table
+            fixedHeader={true}
             className={classes.table}
             aria-labelledby="tableTitle"
-            size={dense ? 'small' : 'medium'}
+            size={'small'}
             aria-label="enhanced table"
           >
             <EnhancedTableHead
+             
               classes={classes}
               numSelected={selected.length}
               order={order}
@@ -409,30 +429,33 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={props.jumlahdata}
+              schema={props.schema}
               
             />
             <TableBody>
               {
-                rows.map((row, index) => {
-                  
-                  const isItemSelected = isSelected(row.id);
-                  const labelId = `enhanced-table-checkbox-${row.id}`;
+                
+                props.data.map((row, index) => {
+                  const isItemSelected = isSelected(row[props.schema[0]]);
+                  const labelId = `enhanced-table-checkbox-${row[props.schema[0]]}`;
                   
                   return (
                     <TableRow
-                      id="rowcheck"
-                      hover
-                      className={classes.tableRow}
-                      classes={{ hover: classes.hover, selected:classes.selected }}
-                      style={{cursor:"pointer"}}
-                      onMouseEnter={selected.length==0?handleEnter:null}
-                      onMouseLeave={selected.length==0?handleLeave:null}
-                      onClick={(event) => handleClick(event, row.id)}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={1}
-                      key={row.id}
-                      selected={isItemSelected}
+                    id="rowcheck"
+                    hover
+                
+                    className={classes.tableRow}
+                    classes={{ hover: classes.hover, selected:classes.selected }}
+                    style={{cursor:"pointer"}}
+                    onMouseEnter={selected.length==0?handleEnter:null}
+                    onMouseLeave={selected.length==0?handleLeave:null}
+                    onClick={(event) => handleClick(event, row[props.schema[0]])}
+                    role="checkbox"
+                    aria-checked={isItemSelected}
+                    tabIndex={1}
+                  
+                    key={index}
+                    selected={isItemSelected}
                     >
                       <TableCell  padding="checkbox">
                         <Checkbox style={{display:hiding}}
@@ -443,13 +466,25 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      <TableCell >
-                        {row.no}
+                      <TableCell key={"nowrap"}>
+                        {index+1+(rowsPerPage*(page+1)-rowsPerPage)}
                       </TableCell>
-                      <TableCell  >
-                        {row.username}
-                      </TableCell>
-                      <TableCell  >{row.name}</TableCell>
+                      {props.schema.map((field, index1)=>{
+                          if(index1==0){
+
+                          }
+                          else{
+                           return(
+                            
+                            <TableCell key={index1} >
+                            {row[field]}
+                            </TableCell>
+
+                           );
+                          } 
+                      })}
+                     
+                      {/* <TableCell  >{row.name}</TableCell>
                       
                       <TableCell >{row.password}</TableCell>
                       <TableCell  >{row.role}</TableCell>
@@ -457,7 +492,7 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
                       
                       <TableCell  >{row.dept}</TableCell>
                    
-                      <TableCell >{row.group}</TableCell>
+                      <TableCell >{row.group}</TableCell> */}
                       
                     </TableRow>
                   );
@@ -476,10 +511,10 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </Paper>
-      <FormControlLabel
+      {/* <FormControlLabel
         control={<Switch checked={dense} onChange={handleChangeDense} />}
         label="Dense padding"
-      />
+      /> */}
     </div>
   );
 }

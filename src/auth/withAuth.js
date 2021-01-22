@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import authMethod from './authMethod';
+import {useDispatch} from 'react-redux';
+
+
 
 export default function withAuth(AuthComponent) {
     const Auth = new authMethod();
-
+  
     return class AuthWrapped extends Component {
         state = {
             confirm: null,

@@ -4,6 +4,13 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import Paper from '@material-ui/core/Paper';
+
+import Checkbox from '@material-ui/core/Checkbox';
+
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import Switch from '@material-ui/core/Switch';
+import InputLabel from '@material-ui/core/InputLabel';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -20,6 +27,11 @@ import { connect } from 'react-redux';
 import PersonIcon from '@material-ui/icons/Person';
 import { useSelector, useDispatch } from 'react-redux';
 import { popupDepart } from '../../reducers/PopAll';
+
+
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
 const useStyles = makeStyles((theme) => ({
   root: {
    
@@ -95,13 +107,14 @@ export default function CustomizedDialogs(props) {
   
 
   const selectedusersetting = useSelector(state => state.userSettingSelected);
-  
+  const dataMenuRedux = useSelector(state=>state.menupilihan.menu);
   // const [username, setUsername] = React.useState("");
   // const [password, setPassword] = React.useState("");
   // const [name, setName] = React.useState("");
   // const [userid, setUserId] = React.useState("");
+  const [ambildataMenu, setAmbildataMenu] = React.useState([]);
   const [dataGroup, setDataGroup] = React.useState([]);
-  
+
   // const [nik, setNik] = React.useState("");
   // const [depart, setDepart] = React.useState(0);
   // const [role, setRole] = React.useState(0);
@@ -124,9 +137,10 @@ export default function CustomizedDialogs(props) {
    menu_url:'',
    menu_id:'',
    menu_desc:'',
+   
+   menu:dataMenuRedux,
   })
   
-
  
   let actionForm = props.actionForm;
  
@@ -139,17 +153,17 @@ export default function CustomizedDialogs(props) {
   const getDepartDetail = React.useCallback((id) => {  //on startup function
     let token = localStorage.getItem('id_token');
 
-    API.post("/credential_service/get_department", {
+    API.post("get_department", {
       key: token,
-      dept_id: id,
+      dept_id: id ,
       info_data: "detail"
     }).then(data => {
       let uaja = data.data.data;
       
       setDataChange({
-            dept_name:data.data.data.dept_name,
-            dept_id:data.data.data.dept_id,
-            group_id:data.data.data.group_id
+            dept_name:uaja["Department Name"],
+            dept_id:id,
+            group_id:uaja["Group Name"].length?uaja["Group Name"][0]["group_id"]:''
         }) 
     })
     
@@ -157,73 +171,92 @@ export default function CustomizedDialogs(props) {
     const getBranchDetail = React.useCallback((id) => {  //on startup function
         let token = localStorage.getItem('id_token');
     
-        API.post("/credential_service/get_branch", {
-          key: token,
-          branch_id: id,
-          info_data: "detail"
-        }).then(data => {
-          let uaja = data.data.data;
+        // API.post("get_branch", {
+        //   key: token,
+        //   branch_id: id,
+        //   info_data: "detail"
+        // }).then(data => {
+        //   let uaja = data.data.data;
           
-          setDataChange({
-                branch_name:data.data.data.branch_name,
-                branch_id:data.data.data.branch_id,
+        //   setDataChange({
+        //         branch_name:data.data.data.branch_name,
+        //         branch_id:data.data.data.branch_id,
                 
-            }) 
-        })
+        //     }) 
+        // })
         
     },[setDataChange])
-
+useEffect(()=>{
+  console.log(dataChange.menu)
+  console.log(props.dataMenuAction)
+ 
+  
+},[dataMenuRedux])
 const getGroupDetail = React.useCallback((id) => {  //on startup function
     let token = localStorage.getItem('id_token');
 
-    API.post("/credential_service/get_group", {
+    API.post("get_group", {
       key: token,
       group_id: id,
       info_data: "detail"
     }).then(data => {
       let uaja = data.data.data;
-      
+    
+      console.log(uaja["Group Name"])
       setDataChange({
-            group_name:data.data.data.group_name,
-            group_id:data.data.data.group_id
+            group_name:uaja["Group Name"],
+            group_id:uaja["Group Id"]
         }) 
     })
     
 },[setDataChange])
+
 const getMenuDetail = React.useCallback((id) => {  //on startup function
   let token = localStorage.getItem('id_token');
 
-  API.post("/credential_service/get_menu", {
-    key: token,
-    menu_id: id,
-    info_data: "detail"
-  }).then(data => {
-    let uaja = data.data.data;
+  // API.post("get_menu", {
+  //   key: token,
+  //   menu_id: id,
+  //   info_data: "detail"
+  // }).then(data => {
+  //   let uaja = data.data.data;
     
-    setDataChange({
-          menu_url:data.data.data.menu_url,
-          menu_id:data.data.data.menu_id,
-          menu_desc:data.data.data.menu_desc
-      }) 
-  })
+  //   setDataChange({
+  //         menu_url:data.data.data.menu_url,
+  //         menu_id:data.data.data.menu_id,
+  //         menu_desc:data.data.data.menu_desc
+  //     }) 
+  // })
   
 },[setDataChange])
 const getRoleDetail = React.useCallback((id) => {  //on startup function
   let token = localStorage.getItem('id_token');
-
-  API.post("/credential_service/get_role", {
+ 
+  API.post("get_role", {
     key: token,
     role_id: id,
-    info_role: "detail"
+    info_data: "detail"
   }).then(data => {
     let uaja = data.data.data;
-    
+    let menubaru = [];
+    console.log(data.data.data)
+    let i = 0;
+    for(const uuu of data.data.data.Menu){
+      console.log(dataChange.menu[i])
+      console.log(uuu.Name)
+      for(const dataMenu of dataChange.menu){
+        if(dataMenu.Name==uuu.Name){
+          menubaru.push(uuu)
+        }
+      }
+    }
+    if(menubaru.length==0){
+      menubaru = dataChange.menu;
+    }
     setDataChange({
-          role_name:data.data.data.role_name,
-          role_id:data.data.data.role_id,
-          menu_id:data.data.data.menu_id,
-          module_id:data.data.data.module_id,
-          report_id:data.data.data.report_id
+          role_name:data.data.data["Role Name"],
+          role_id:id,
+          menu:menubaru
       }) 
   })
   
@@ -253,7 +286,7 @@ const getRoleDetail = React.useCallback((id) => {  //on startup function
 const getGroup = React.useCallback(() => {  //on startup function
     let token = localStorage.getItem('id_token');
 
-    API.post("/credential_service/get_group", {
+    API.post("get_group", {
       key: token,
       info_data: "all"
     }).then(data => {
@@ -277,13 +310,13 @@ const getGroup = React.useCallback(() => {  //on startup function
 
   
 
- 
+
   
 
 
 
 
-
+ 
 
   
   const dispatch = useDispatch();
@@ -307,7 +340,7 @@ const getGroup = React.useCallback(() => {  //on startup function
     // console.log(role);
     // dispatch(kirimuserselected(0, []))
     if (actionForm == "Edit Department") {
-      API.post("/credential_service/update_department", {
+      API.post("update_department", {
         key: token,
         dept_id:dataChange.dept_id,
         dept_name:dataChange.dept_name,
@@ -331,7 +364,7 @@ const getGroup = React.useCallback(() => {  //on startup function
         resetForm();
       })
     } else  if (actionForm == "Add Department") {
-      API.post("/credential_service/create_department", {
+      API.post("create_department", {
         key: token,
         
         dept_id:dataChange.dept_id,
@@ -352,7 +385,7 @@ const getGroup = React.useCallback(() => {  //on startup function
       })
     }
     else  if (actionForm == "Add Branch") {
-        API.post("/credential_service/create_branch", {
+        API.post("create_branch", {
           key: token,
           
           branch_id:dataChange.branch_id,
@@ -373,7 +406,7 @@ const getGroup = React.useCallback(() => {  //on startup function
         })
       }
       else  if (actionForm == "Add Role") {
-        API.post("/credential_service/create_role", {
+        API.post("create_role", {
           key: token,
           
           role_id:dataChange.role_id,
@@ -397,7 +430,7 @@ const getGroup = React.useCallback(() => {  //on startup function
         })
       }
       else if (actionForm == "Edit Role") {
-        API.post("/credential_service/update_role", {
+        API.post("update_role", {
           key: token,
         
           role_id:dataChange.role_id,
@@ -424,7 +457,7 @@ const getGroup = React.useCallback(() => {  //on startup function
         })
       }
     else  if (actionForm == "Add Group") {
-        API.post("/credential_service/create_group", {
+        API.post("create_group", {
           key: token,
           
          
@@ -445,7 +478,7 @@ const getGroup = React.useCallback(() => {  //on startup function
         })
       }
       else  if (actionForm == "Add Menu") {
-        API.post("/credential_service/create_menu", {
+        API.post("create_menu", {
           key: token,
           
          
@@ -467,7 +500,7 @@ const getGroup = React.useCallback(() => {  //on startup function
         })
       }
       else if (actionForm == "Edit Menu") {
-        API.post("/credential_service/update_menu", {
+        API.post("update_menu", {
           key: token,
           menu_id:dataChange.menu_id,
           menu_desc:dataChange.menu_desc,
@@ -492,7 +525,7 @@ const getGroup = React.useCallback(() => {  //on startup function
         })
       }
      else if (actionForm == "Edit Group") {
-        API.post("/credential_service/update_group", {
+        API.post("update_group", {
           key: token,
         
           group_name:dataChange.group_name,
@@ -517,7 +550,7 @@ const getGroup = React.useCallback(() => {  //on startup function
         })
       }
       else if (actionForm == "Edit Branch") {
-        API.post("/credential_service/update_branch", {
+        API.post("update_branch", {
           key: token,
         
           branch_name:dataChange.branch_name,
@@ -593,6 +626,7 @@ const getGroup = React.useCallback(() => {  //on startup function
   const handleClickOpen = () => {
     setOpen(true);
   };
+
   const resetForm = React.useCallback(() => {
     setDataChange({
      
@@ -610,6 +644,7 @@ const getGroup = React.useCallback(() => {  //on startup function
         menu_url:'',
         menu_id:'',
         menu_desc:'',
+        menu:dataMenuRedux
    
     })
     dispatch(kirimuserselected(0,[]))
@@ -624,18 +659,18 @@ const getGroup = React.useCallback(() => {  //on startup function
       )
   })
   const handleClose = React.useCallback(() => {
-    
+    dispatch(kirimuserselected(0,[]))
     if(props.actionForm=="Add Department"||props.actionForm=="Edit Department"){
         dispatch(kirimisOpen(false,"CLOSEDEPART"))
-       
+     
 
     }else if(props.actionForm=="Add Group" || props.actionForm=="Edit Group"){
         dispatch(kirimisOpen(false,"CLOSEGROUP"))
-        
+       
     }
     else if(props.actionForm=="Add Branch" || props.actionForm=="Edit Branch"){
         dispatch(kirimisOpen(false,"CLOSEBRANCH"))
-        
+       
     }
     else if(props.actionForm=="Add Role" || props.actionForm=="Edit Role"){
       dispatch(kirimisOpen(false,"CLOSEROLE"))
@@ -643,7 +678,7 @@ const getGroup = React.useCallback(() => {  //on startup function
     else if(props.actionForm=="Add Menu" || props.actionForm=="Edit Menu"){
       dispatch(kirimisOpen(false,"CLOSEMENU"))
     }
-    dispatch(kirimuserselected(0,[]))
+    
     setOpen(false);
     resetForm();
 
@@ -652,6 +687,7 @@ const getGroup = React.useCallback(() => {  //on startup function
   useEffect(() => {
     setOpen(props.open)
    
+  
    
     if(actionForm=="Edit Department" || actionForm=="Add Department"){
         getGroup();
@@ -662,7 +698,7 @@ const getGroup = React.useCallback(() => {  //on startup function
         //   let id = selectedusersetting.selectedId[0];
         //   getUserDetail(id);
         } else if(actionForm == "Edit Department") {
-            resetForm();
+           
         
           if(selected.selectedUser==1){
               getDepartDetail(selected.selectedId[0]);
@@ -676,7 +712,7 @@ const getGroup = React.useCallback(() => {  //on startup function
         //   let id = selectedusersetting.selectedId[0];
         //   getUserDetail(id);
         } else if(actionForm == "Edit Group") {
-            resetForm();
+            // resetForm();
         
           if(selected.selectedUser==1){
               getGroupDetail(selected.selectedId[0]);
@@ -691,7 +727,7 @@ const getGroup = React.useCallback(() => {  //on startup function
     //   let id = selectedusersetting.selectedId[0];
     //   getUserDetail(id);
     } else if(actionForm == "Edit Branch") {
-        resetForm();
+       
     
       if(selected.selectedUser==1){
           getBranchDetail(selected.selectedId[0]);
@@ -699,17 +735,20 @@ const getGroup = React.useCallback(() => {  //on startup function
 }
 }
 else if(actionForm=="Edit Role" || actionForm=="Add Role"){
+
   if (actionForm == "Add Role") {
   
       resetForm();
+      
       // console.log(open)
   //   let id = selectedusersetting.selectedId[0];
   //   getUserDetail(id);
   } else if(actionForm == "Edit Role") {
-      resetForm();
+    
   
     if(selected.selectedUser==1){
         getRoleDetail(selected.selectedId[0]);
+        
     }
 }
 
@@ -740,7 +779,7 @@ else if(actionForm=="Edit Menu" || actionForm=="Add Menu"){
       <Dialog
      
         fullWidth={true}
-        maxWidth="sm" style={{ }}  onClose={handleClose}  aria-labelledby="customized-dialog-title" open={open}>
+        maxWidth={actionForm=="Edit Role" || actionForm=="Add Role"?"lg":'sm'} style={{ }}  onClose={handleClose}  aria-labelledby="customized-dialog-title" open={open}>
         <DialogTitle style={{ }} id="customized-dialog-title" onClose={handleClose}>
           <div style={{ display: "flex", }}>
             <Paper style={{ width: "50px", height: "50px", display: "flex", justifyContent: "center", alignItems: "center" }}><PersonIcon ></PersonIcon></Paper>
@@ -756,14 +795,15 @@ else if(actionForm=="Edit Menu" || actionForm=="Add Menu"){
 
         <DialogContent className={classes.root}  >
           <Grid container spacing={1} style={{display:'flex', justifyContent:'center', alignItems:'center' ,}} >
+            
 
-
-            <Grid item xs={8}   style={{width:"100%",boxShadow: "rgba(0, 0, 0, 0.24) 0px 3px 8px", padding:'10px'}} >
+            <Grid item xs={actionForm=="Edit Role" || actionForm=="Add Role"?12:8}   style={{width:"100%",boxShadow: "rgba(0, 0, 0, 0.24) 0px 3px 8px", padding:'10px'}} >
             
                
              {actionForm=="Edit Department"||actionForm=="Add Department"?
                 <div>
-                 <TextField
+                  
+                 {/* <TextField
                  style={{ width:"100%"}}
                  label={"Departement Id"}
                  onChange={handleChange}
@@ -777,7 +817,7 @@ else if(actionForm=="Edit Menu" || actionForm=="Add Menu"){
                  // helperText={touched && error}
                  // {...input}
                  // {...custom}
-                 />                             
+                 />                              */}
                   <TextField
                  style={{ width:"100%", marginTop:"10px"}}
                  label={"Department Name"} 
@@ -789,13 +829,36 @@ else if(actionForm=="Edit Menu" || actionForm=="Add Menu"){
                  
                 
                   options={dataGroup}
-                
+              
                   value={dataChange.group_id?dataGroup.find(v => v.group_id == dataChange.group_id):''}
                   // getOptionSelected ={(option, value) => option === value?option:''}
-                  getOptionLabel={(option) => option.group_name?option.group_name:""}
+                  getOptionLabel={(option) => option["Group Name"]?option["Group Name"]:""}
                   onChange={(e, value) => handleChange(convert("group_id", value ? value.group_id : ''))}
-                  renderInput={(params) => <TextField name="depart" style={{ marginTop: "10px", }} {...params} label="Group" variant="outlined" />}
+                  renderInput={(
+                    params) => <TextField name="depart" style={{ marginTop: "10px", }} {...params} label="Group" variant="outlined" />}
                 />
+
+                 {/* <Autocomplete
+      multiple
+      id="checkboxes-tags-demo"
+      options={dataGroup}
+      disableCloseOnSelect
+      getOptionLabel={(option) => option["Group Name"]}
+      renderOption={(option, { selected }) => (
+        <React.Fragment>
+          <Checkbox
+            icon={icon}
+            checkedIcon={checkedIcon}
+            style={{ marginRight: 8 }}
+            checked={selected}
+          />
+          {option["Group Name"]}
+        </React.Fragment>
+      )}
+      style={{ width:"100%", marginTop:"10px"}}
+      renderInput={(params) => (
+        <TextField {...params} variant="outlined" label="Group" placeholder="Group" />
+      )}></Autocomplete> */}
                  </div>
              :actionForm=="Edit Group"||actionForm=="Add Group"?
              <div>
@@ -847,28 +910,19 @@ else if(actionForm=="Edit Menu" || actionForm=="Add Menu"){
            value={dataChange.branch_name} ></TextField>
        </div> :actionForm=="Edit Role"||actionForm=="Add Role"?
          <div>
-         <TextField
-       style={{ width:"100%"}}
-       label={"Role ID"}
-       onChange={handleChange}
-       variant="outlined"
-       name={"role_id"}
-       type="number"
-       value={dataChange.role_id}
-       
-       // error={touched && invalid}
-       // helperText={touched && error}
-       // {...input}
-       // {...custom}
-       />                             
-        <TextField
+           <Grid container>
+           <Grid item xs={12} sm={6} md={3} >
+             <Grid item>
+
+            
+           <TextField
        style={{ width:"100%", marginTop:"10px"}}
        label={"Role Name"} 
        onChange={handleChange}
        variant="outlined"
        name={"role_name"}
        value={dataChange.role_name} ></TextField>
-        <TextField
+        {/* <TextField
        style={{ width:"100%",marginTop:"10px"}}
        label={"Module ID"}
        onChange={handleChange}
@@ -881,8 +935,8 @@ else if(actionForm=="Edit Menu" || actionForm=="Add Menu"){
        // helperText={touched && error}
        // {...input}
        // {...custom}
-       />           
-        <TextField
+       />            */}
+        {/* <TextField
        style={{ width:"100%",marginTop:"10px"}}
        label={"Report ID"}
        onChange={handleChange}
@@ -895,8 +949,8 @@ else if(actionForm=="Edit Menu" || actionForm=="Add Menu"){
        // helperText={touched && error}
        // {...input}
        // {...custom}
-       />     
-        <TextField
+       />      */}
+        {/* <TextField
        style={{ width:"100%",marginTop:"10px"}}
        label={"Menu ID"}
        onChange={handleChange}
@@ -909,7 +963,84 @@ else if(actionForm=="Edit Menu" || actionForm=="Add Menu"){
        // helperText={touched && error}
        // {...input}
        // {...custom}
-       />                 
+       /> */}
+        </Grid>
+           </Grid>
+           <Grid container xs={12} sm={6} md={9}>
+           {dataChange.menu?dataChange.menu.map((data, index)=>{
+             return (
+            <Grid container>  
+
+               <Grid item xs={6} sm={3} md={4} style={{display:"flex", justifyContent:'center', alignItems:'center',height:'80px'}}>
+             <InputLabel styles={{width:"100%"}}>{data.Name}</InputLabel>
+           </Grid>
+             <Grid item xs={6} sm={3} md={5}>
+           <div style={{display:"flex", justifyContent:"center", alignItems:"center", direction:"row",width:"100%", height:"80px"}}>
+ 
+ <div style={{margin:'10px',textAlign:"center"}}>
+ <Switch
+ checked={data.View=="true"?true:false}
+ onChange={e=>handleChange(convert(e.target.name, e.target.checked))}
+ name="view"
+ color="primary"
+ />
+  <br></br>
+ <InputLabel>View</InputLabel>
+ </div>
+ <div style={{margin:'10px',textAlign:"center"}}>
+ <Switch
+ checked={data.Create=="true"?true:false}
+ onChange={e=>handleChange(convert(e.target.name, e.target.checked))}
+ name="create"
+ color="primary"
+ />
+  <br></br>
+ <InputLabel>Create</InputLabel>
+ </div><div style={{margin:'10px',textAlign:"center"}}>
+ <Switch
+ checked={data.Update=="true"?true:false}
+ onChange={e=>handleChange(convert(e.target.name, e.target.checked))}
+ name="update"
+ color="primary"
+ />
+  <br></br>
+ <InputLabel>Update</InputLabel>
+ </div><div style={{margin:'10px', textAlign:"center"}}>
+ <Switch
+ checked={data.Delete=="true"?true:false}
+ onChange={e=>handleChange(convert(e.target.name, e.target.checked))}
+ name="delete"
+ color="primary"
+ />
+  <br></br>
+ <InputLabel>Delete</InputLabel>
+ </div>
+ 
+    </div>
+    </Grid>
+    
+    </Grid> 
+
+            ) }):''}     
+             </Grid>
+           
+           </Grid>
+          
+         {/* <TextField
+       style={{ width:"100%"}}
+       label={"Role ID"}
+       onChange={handleChange}
+       variant="outlined"
+       name={"role_id"}
+       type="number"
+       value={dataChange.role_id}
+       
+       // error={touched && invalid}
+       // helperText={touched && error}
+       // {...input}
+       // {...custom}
+       />                              */}
+                         
    </div> 
        
        :actionForm=="Edit Menu"||actionForm=="Add Menu"?

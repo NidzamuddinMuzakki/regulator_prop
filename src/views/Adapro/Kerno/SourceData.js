@@ -122,6 +122,16 @@ export default class Tree extends Component {
                   //Source with table 
                   [
                     <div>
+                       
+                    
+                    
+                      <Button id={'btnFilter'+rowInfo.node.id} outline color="primary" size="sm" className="btn-pill" onClick={() => {
+                        this.setState({selId:rowInfo.node.id, selPanel:'99'},()=>{
+                          this.setState({selId:rowInfo.node.id, selPanel:'01'})
+                        })
+                      }}><i className="fa fa-filter"></i></Button>
+                      <Tooltip placement="top" isOpen={this.state['btnFilter'+rowInfo.node.id]} target={'btnFilter'+rowInfo.node.id} toggle={() => { this.setState({ ['btnFilter'+rowInfo.node.id]:!this.state['btnFilter'+rowInfo.node.id] }) }} >Source Filter</Tooltip>
+                  
                       <Button id={'btnEditSource'+rowInfo.node.id} outline color="secondary" size="sm" className="btn-pill" onClick={() => {
                         this.setState({selId:rowInfo.node.id, selPanel:'00'})
                       }}><i className="fa fa-pencil"></i></Button>
@@ -133,26 +143,13 @@ export default class Tree extends Component {
                         this.tableAddFromSource(rowInfo.node.id)
                       }}><i className="fa fa-table"></i></Button>
                       <Tooltip placement="top" isOpen={this.state['btnTable'+rowInfo.node.id]} target={'btnTable'+rowInfo.node.id} toggle={() => { this.setState({ ['btnTable'+rowInfo.node.id]:!this.state['btnTable'+rowInfo.node.id] }) }} >Add New Table</Tooltip>
-                    </div>,
-
-                    rowInfo.node.isfilter?
-                    <div>
-                      <Button id={'btnFilter'+rowInfo.node.id} color="info" size="sm" className="btn-pill" onClick={() => {
-                        this.setState({selId:rowInfo.node.id, selPanel:'99'},()=>{
-                          this.setState({selId:rowInfo.node.id, selPanel:'01'})
-                        })
-                      }}><i className="fa fa-filter"></i></Button>
-                      <Tooltip placement="top" isOpen={this.state['btnFilter'+rowInfo.node.id]} target={'btnFilter'+rowInfo.node.id} toggle={() => { this.setState({ ['btnFilter'+rowInfo.node.id]:!this.state['btnFilter'+rowInfo.node.id] }) }} >Source Filter</Tooltip>
+                    
+                    
                     </div>
-                    :
-                    <div>
-                      <Button id={'btnFilter'+rowInfo.node.id} outline color="primary" size="sm" className="btn-pill" onClick={() => {
-                        this.setState({selId:rowInfo.node.id, selPanel:'99'},()=>{
-                          this.setState({selId:rowInfo.node.id, selPanel:'01'})
-                        })
-                      }}><i className="fa fa-filter"></i></Button>
-                      <Tooltip placement="top" isOpen={this.state['btnFilter'+rowInfo.node.id]} target={'btnFilter'+rowInfo.node.id} toggle={() => { this.setState({ ['btnFilter'+rowInfo.node.id]:!this.state['btnFilter'+rowInfo.node.id] }) }} >Source Filter</Tooltip>
-                    </div>,
+
+                  
+                    
+                     ,
                     // <Button color="primary" size="sm" className="btn-pill" onClick={() => {
                     //   this.setState({selId:rowInfo.node.id, selPanel:'02'})
                     // }}><i className="fa fa-list-ul"></i></Button>,

@@ -62,16 +62,32 @@ function EnhancedTableHead(props) {
   };
 
   // console.log("hay"+props.data)
-  const headCells = [
-    { id: 'no', numeric: true, disablePadding: true, label: 'No' },
-    { id: 'branch_id', numeric: false, disablePadding: false, label: 'Branch ID' },
-    { id: 'branch_name', numeric: false, disablePadding: false, label: 'Branch Name' },
-    { id: 'create_time', numeric: false, disablePadding: false, label: 'Create Time' },
-    { id: 'update_time', numeric: false, disablePadding: false, label: 'Update Time' },
+  const headCells = [];
+  let i=0;
+  if(props.schema){
+    for(const key of props.schema){
+      if(i==0){
+        headCells.push({ id: 'no', numeric: true, disablePadding: true, label: 'No' })
+  
+      }
+      else{
+        headCells.push({ id: key, numeric: false, disablePadding: false, label: key })
+      }
+      i++;
+    }
+   
+  }
+  // const headCells = [
+  //   { id: 'no', numeric: true, disablePadding: true, label: 'No' },
+  //   { id: 'branch_id', numeric: false, disablePadding: false, label: 'Branch ID' },
+  //   { id: 'branch_name', numeric: false, disablePadding: false, label: 'Branch Name' },
+  //   { id: 'create_time', numeric: false, disablePadding: false, label: 'Create Time' },
+  //   { id: 'update_time', numeric: false, disablePadding: false, label: 'Update Time' },
  
 
 
-  ];
+  // ];
+ 
   
   return (
   
@@ -314,7 +330,7 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
       setSelected([]);
     }
     else if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.id);
+      const newSelecteds = props.data.map((n) => n[props.schema[1]]);
       let jumlah = newSelecteds.length;
       
    
@@ -410,19 +426,20 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
               classes={classes}
               numSelected={selected.length}
               order={order}
+           
               orderBy={orderBy}
-              
+              schema={props.schema}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={props.length}
+              rowCount={props.jumlahdata}
               
             />
             <TableBody>
               {
-                rows.map((row, index) => {
+                props.data.map((row, index) => {
                   
-                  const isItemSelected = isSelected(row.id);
-                  const labelId = `enhanced-table-checkbox-${row.id}`;
+                  const isItemSelected = isSelected(row[props.schema[1]]);
+                  const labelId = `enhanced-table-checkbox-${row[props.schema[1]]}`;
                   
                   return (
                     <TableRow
@@ -432,13 +449,13 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
                       style={{cursor:"pointer"}}
                       onMouseEnter={selected.length==0?handleEnter:null}
                       onMouseLeave={selected.length==0?handleLeave:null}
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={(event) => handleClick(event, row[props.schema[1]])}
                       role="checkbox"
                       className={classes.tableRow}
                       classes={{ hover: classes.hover, selected:classes.selected }}
                       aria-checked={isItemSelected}
                       tabIndex={1}
-                      key={row.id}
+                      key={row[props.schema[1]]}
                    
                       selected={isItemSelected}
                     >
@@ -452,7 +469,27 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      <TableCell    component="th"
+
+                      <TableCell >
+                        {index+1+(rowsPerPage*(page+1)-rowsPerPage)}
+                      </TableCell>
+                      {props.schema.map((field, index1)=>{
+                          if(index1==0){
+
+                          }
+                          else{
+                           return(
+                            
+                            <TableCell  key={index1}>
+                            {row[field]}
+                            </TableCell>
+
+                           );
+                          } 
+                      })}
+
+
+                      {/* <TableCell    component="th"
                 scope="row" className={classes.tableCell} >
                         {row.no}
                       </TableCell>
@@ -461,7 +498,7 @@ let nomorTogel = rowsPerPage*(page+1)-rowsPerPage;
                       </TableCell>
                       <TableCell  >{row.branchName}</TableCell>
                       <TableCell  >{row.crtDate}</TableCell>
-                      <TableCell  >{row.updDate}</TableCell>
+                      <TableCell  >{row.updDate}</TableCell> */}
                       
                       
                       

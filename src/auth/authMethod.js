@@ -1,6 +1,8 @@
 import decode from 'jwt-decode';
-const data = "http://34.101.137.236:8080/credential_service/login";
-const data1 = "http://localhost:5450/credential_service/login"
+import {connect} from 'react-redux';
+const data = "http://34.101.137.61:22112/credential_service/login";
+const data1 = "http://localhost:5450/credential_service/login";
+
 export default class authMethod {
     login = (username, password) => {
         return this.fetch(data, {
@@ -44,6 +46,7 @@ export default class authMethod {
     }
     getConfirm = () => {
         let answer = decode(this.getToken());
+     
         console.log("Received answer.");
         return answer;
     }
